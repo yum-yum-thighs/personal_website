@@ -1,0 +1,180 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>my art</title>
+
+<style>
+    @font-face {
+        font-family: 'CMUNRM';
+        src: url('../fonts/cmunrm.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        background: #000000;
+        color: #ffffff;
+        font-family: 'CMUNRM', serif;
+    }
+
+    .back {
+        position: fixed;
+        top: 25px;
+        left: 30px;
+        color: #00ffff;
+        text-decoration: none;
+        font-size: 1.2rem;
+        z-index: 100;
+    }
+
+    .back:hover {
+        color: #ff00ff;
+    }
+
+    .page {
+        width: 90%;
+        margin: 100px auto 60px;
+    }
+
+    .title {
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: normal;
+        margin-bottom: 60px;
+    }
+
+    .gallery {
+        column-count: 2;
+        column-gap: 25px;
+    }
+
+    .item {
+        break-inside: avoid;
+        margin-bottom: 25px;
+    }
+
+    .item img,
+    .item video {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: #111111;
+    }
+
+    .item img:hover,
+    .item video:hover {
+        outline: 1px solid #00ffff;
+    }
+
+    @media (max-width: 700px) {
+        .gallery {
+            column-count: 1;
+        }
+    }
+</style>
+
+</head> <body>
+<a class="back" href="index.html">← back</a>
+
+<main class="page">
+
+    <h1 class="title">my art</h1>
+
+    <div class="gallery" id="gallery"></div>
+
+</main>
+
+
+<!-- GALLERY_SCRIPT_START -->
+
+<script>
+const files = [
+    {
+        "name": "Box.png",
+        "type": "image"
+    },
+    {
+        "name": "Box2.png",
+        "type": "image"
+    },
+    {
+        "name": "Crystal.png",
+        "type": "image"
+    },
+    {
+        "name": "Crystal2.png",
+        "type": "image"
+    },
+    {
+        "name": "Floral.png",
+        "type": "image"
+    },
+    {
+        "name": "Fold.png",
+        "type": "image"
+    },
+    {
+        "name": "Hall.png",
+        "type": "image"
+    },
+    {
+        "name": "Horn.png",
+        "type": "image"
+    },
+    {
+        "name": "House.png",
+        "type": "image"
+    },
+    {
+        "name": "Lamp.png",
+        "type": "image"
+    },
+    {
+        "name": "Metalheart_1.png",
+        "type": "image"
+    },
+    {
+        "name": "Planet.png",
+        "type": "image"
+    },
+    {
+        "name": "Tree.mp4",
+        "type": "video"
+    },
+    {
+        "name": "Tree.png",
+        "type": "image"
+    }
+];
+const gallery = document.getElementById("gallery");
+
+files.forEach(file => {
+    const item = document.createElement("div");
+    item.className = "item";
+
+    if (file.type === "image") {
+        const image = document.createElement("img");
+        image.src = "myart/" + file.name;
+        image.alt = file.name;
+        item.appendChild(image);
+    }
+
+    if (file.type === "video") {
+        const video = document.createElement("video");
+        video.src = "myart/" + file.name;
+        video.controls = true;
+        video.preload = "metadata";
+        item.appendChild(video);
+    }
+
+    gallery.appendChild(item);
+});
+</script>
+
+<!-- GALLERY_SCRIPT_END -->
+
+</body> </html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>physics</title>
+
+    <style>
+        @font-face {
+            font-family: 'CMUNRM';
+            src: url('../fonts/cmunrm.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000000;
+            color: #ffffff;
+            font-family: 'CMUNRM', serif;
+        }
+
+        .back {
+            position: absolute;
+            top: 25px;
+            left: 30px;
+            color: #00ffff;
+            text-decoration: none;
+            font-size: 1.2rem;
+            z-index: 10;
+        }
+
+        .back:hover {
+            color: #ff00ff;
+        }
+
+        .physics {
+            width: 90%;
+            height: 85vh;
+            margin: 70px auto 0;
+            display: flex;
+            gap: 2px;
+        }
+
+        .window {
+            flex: 1;
+            height: 100%;
+            overflow-y: auto;
+            padding: 0 35px 40px;
+            box-sizing: border-box;
+        }
+
+        .window:first-child {
+            border-right: 1px solid #333333;
+        }
+
+        .window-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: normal;
+            margin: 0 0 40px;
+            color: #ffffff;
+        }
+
+        .link {
+            display: block;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .link:hover {
+            color: #00ffff;
+        }
+
+        .window::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .window::-webkit-scrollbar-track {
+            background: #000000;
+        }
+
+        .window::-webkit-scrollbar-thumb {
+            background: #333333;
+        }
+
+        .window::-webkit-scrollbar-thumb:hover {
+            background: #00ffff;
+        }
+
+        .window {
+            scrollbar-width: thin;
+            scrollbar-color: #333333 #000000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <a class="back" href="../index.html">← back</a>
+
+    <main class="physics">
+
+        <section class="window">
+
+            <h1 class="window-title">other</h1>
+
+            <a class="link"
+               href="https://phet.colorado.edu/"
+               target="_blank"
+               rel="noopener noreferrer">
+                PhET Interactive Simulations
+            </a>
+
+            <a class="link"
+               href="https://www.feynmanlectures.caltech.edu/"
+               target="_blank"
+               rel="noopener noreferrer">
+                The Feynman Lectures
+            </a>
+
+            <a class="link"
+               href="https://ocw.mit.edu/"
+               target="_blank"
+               rel="noopener noreferrer">
+                MIT OpenCourseWare
+            </a>
+
+        </section>
+
+        <section class="window">
+
+            <h1 class="window-title">mine</h1>
+
+            <a class="link" href="#">
+                My Physics Notes
+            </a>
+
+            <a class="link" href="#">
+                My Experiments
+            </a>
+
+            <a class="link" href="#">
+                My Physics Projects
+            </a>
+
+        </section>
+
+    </main>
+
+</body>
+</html>
+

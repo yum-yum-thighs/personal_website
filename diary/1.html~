@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My First Post</title>
+
+    <style>
+        @font-face {
+            font-family: 'CMUNRM';
+            src: url('../fonts/cmunrm.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+            background: #000000;
+            color: #ffffff;
+            font-family: 'CMUNRM', serif;
+        }
+
+        .back {
+            position: absolute;
+            top: 25px;
+            left: 30px;
+            color: #00ffff;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+
+        .back:hover {
+            color: #ff00ff;
+        }
+
+        article {
+            width: 75%;
+            max-width: 850px;
+            margin: 100px auto;
+        }
+
+        .number {
+            color: #00ffff;
+            font-size: 1.1rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: normal;
+            color: #ff00ff;
+            margin: 10px 0;
+        }
+
+        .date {
+            color: #777777;
+            font-size: 1.1rem;
+            margin-bottom: 50px;
+        }
+
+        .content {
+            font-size: 1.3rem;
+            line-height: 1.7;
+        }
+
+        .content p {
+            margin-bottom: 25px;
+        }
+
+        .content h2 {
+            color: #00ffff;
+            font-weight: normal;
+            margin-top: 45px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <a class="back" href="index.html">← diary</a>
+
+    <article>
+
+        <div class="number">001</div>
+
+        <h1>My First Post</h1>
+
+        <div class="date">04.09.2026</div>
+
+        <div class="content">
+
+            <p>
+                This is my first diary entry.
+            </p>
+
+            <p>
+                I can write whatever I want here.
+                This is the actual content of the blog post.
+            </p>
+
+            <h2>A thought</h2>
+
+            <p>
+                This is another paragraph where I can continue writing.
+            </p>
+
+        </div>
+
+    </article>
+
+</body>
+</html>
+

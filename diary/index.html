@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>diary</title>
+
+    <style>
+        @font-face {
+            font-family: 'CMUNRM';
+            src: url('../fonts/cmunrm.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+            background: #000000;
+            color: #ffffff;
+            font-family: 'CMUNRM', serif;
+        }
+
+        .back {
+            position: absolute;
+            top: 25px;
+            left: 30px;
+            color: #00ffff;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+
+        .back:hover {
+            color: #ff00ff;
+        }
+
+        .diary {
+            width: 80%;
+            max-width: 1000px;
+            margin: 80px auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: normal;
+            color: #ff00ff;
+            margin-bottom: 60px;
+        }
+
+        .post {
+            display: grid;
+            grid-template-columns: 80px 180px 1fr;
+            gap: 20px;
+            padding: 18px 0;
+            border-bottom: 1px solid #333333;
+            font-size: 1.3rem;
+        }
+
+        .number {
+            color: #00ffff;
+        }
+
+        .date {
+            color: #888888;
+        }
+
+        .title {
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .title:hover {
+            color: #ff00ff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <a class="back" href="../index.html">← back</a>
+
+    <main class="diary">
+
+        <h1>diary</h1>
+
+        <div class="post">
+            <div class="number">1</div>
+            <div class="date">04.09.2026</div>
+            <a class="title" href="1.html">My First Post</a>
+        </div>
+	
+        <div class="post">
+            <div class="number">2</div>
+            <div class="date">06.09.2026</div>
+            <a class="title" href="2.html">Why I Hate Humanoid Robots</a>
+        </div>
+
+	
+    </main>
+
+</body>
+</html>
