@@ -23,7 +23,8 @@ window.addEventListener('load', () => {
     window.addEventListener('keyup', (e) => { keys[e.key] = false; });
 
     if (typeof Level !== 'undefined') {
-        currentLevel = new Level(1, canvas.width, canvas.height);
+        const levelNum = window.LEVEL_NUMBER || 1;
+        currentLevel = new Level(levelNum, canvas.width, canvas.height);
     }
 
     requestAnimationFrame(gameLoop);

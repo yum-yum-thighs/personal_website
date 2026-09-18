@@ -1,3 +1,4 @@
+/* ===== COLORS ===== */
 const OPTIC_COLORS = {
     concaveMirror: '#00ff66',
     convexMirror: '#00e5ff',
@@ -11,18 +12,19 @@ const PALETTE = {
     wall: '#00FF00',
     wallGlow: 'rgba(0, 255, 0, 0.6)',
     axis: '#00FF00',
-    rayFocus: '#ff0055',
-    rayCenter: '#00e5ff',
+    ray1: '#ff0055',
+    ray2: '#00e5ff',
     image: '#ff9100',
+    imageVirtual: '#ff3333',
     object: '#00e5ff',
     exitBox: '#ff0055',
-    pickupIcon: '#00ff66',
     hudBg: 'rgba(10, 12, 20, 0.92)',
     hudBorder: 'rgba(0, 255, 0, 0.4)',
     hudText: '#ffffff',
     hudAccent: '#00ff66',
 };
 
+/* ===== OPTIC DEFAULTS ===== */
 const OPTIC_TYPES = {
     concaveMirror: { focalLength: 100 },
     convexMirror: { focalLength: -100 },
@@ -31,10 +33,10 @@ const OPTIC_TYPES = {
     planeMirror: { focalLength: Infinity },
 };
 
-const ARROW_HEIGHT = 40;
+/* ===== GAMEPLAY CONSTANTS ===== */
+const ARROW_HEIGHT = 50;
 const ARROW_SPEED = 4;
 const INTERACT_RADIUS = 100;
-const ROTATE_STEP_DEG = 15;
 const FOCAL_STEP = 20;
 const FOCAL_MAX = 200;
 const FOCAL_MIN = 40;
@@ -54,6 +56,7 @@ const KEY_BINDINGS = {
     Escape: { action: 'back' },
 };
 
+/* ===== HELPERS ===== */
 function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
     ctx.moveTo(x + r, y);
@@ -64,79 +67,63 @@ function roundRect(ctx, x, y, w, h, r) {
     ctx.closePath();
 }
 
-function labelChip(ctx, text, x, y, color) {
-    ctx.save();
-    ctx.font = '11px monospace';
-    const w = ctx.measureText(text).width + 12;
-    ctx.fillStyle = 'rgba(10, 12, 20, 0.9)';
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1;
-    roundRect(ctx, x - w / 2, y - 8, w, 16, 4);
-    ctx.fill(); ctx.stroke();
-    ctx.fillStyle = color;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, x, y);
-    ctx.restore();
-}
-
+/* ========================================================================
+   LEVEL CLASS
+   ======================================================================== */
 class Level {
-    constructor(levelNum, canvasWidth = window.innerWidth, canvasHeight = window.innerHeight) {
+    constructor(levelNum, canvasWidth, canvasHeight) {
         this.number = levelNum;
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
         this.keyPrev = {};
         this.isWin = false;
-        
+
         this.backBtnBounds = { x: 16, y: 12, width: 80, height: 28 };
         this.handleCanvasClick = this.handleCanvasClick.bind(this);
         window.removeEventListener('click', this.handleCanvasClick);
         window.addEventListener('click', this.handleCanvasClick);
-
         this.init();
     }
 
+    /* ------------------------------------------------------------------
+       INIT — builds the level layout
+       ------------------------------------------------------------------ */
     init() {
         this.isWin = false;
         const w = this.canvasWidth;
         const h = this.canvasHeight;
-        
         this.sidebarWidth = 220;
         const playW = w - this.sidebarWidth;
-
-        // Central axis line passing horizontally through the middle of the room
         this.centerY = h / 2;
 
+        // Outer walls
         this.walls = [
             { x1: 20, y1: 50, x2: playW, y2: 50 },
             { x1: 20, y1: h - 20, x2: playW, y2: h - 20 },
             { x1: 20, y1: 50, x2: 20, y2: h - 20 },
             { x1: playW, y1: 50, x2: playW, y2: h - 20 },
-            { x1: playW * 0.5, y1: 50, x2: playW * 0.5, y2: h - 20 },
         ];
 
-        this.pickups = [];
+        // Level-specific walls
+        if (this.number === 1) {
+            this.walls.push({ x1: playW * 0.5, y1: 50, x2: playW * 0.5, y2: h - 150 });
+        } else if (this.number === 2) {
+            this.walls.push({ x1: playW * 0.5, y1: 50, x2: playW * 0.5, y2: h - 20 });
+        }
 
-        this.exitZone = {
-            x: playW * 0.65,
-            y: this.centerY - 40,
-            width: playW * 0.25,
-            height: 80,
-        };
+        this.exitZone = { x: playW * 0.65, y: this.centerY - 40, width: playW * 0.25, height: 80 };
 
         this.inventory = {
-            concaveMirror: 1,
-            convexMirror: 1,
-            concaveLens: 1,
-            convexLens: 1,
+            concaveMirror: 1, convexMirror: 1,
+            concaveLens: 1, convexLens: 1,
             planeMirror: 1,
         };
 
         this.placedOptics = [];
         this.calculatedImage = null;
         this.rayPaths = [];
+        this.teleportFlash = 0;
 
-        // Player arrow stands right on the central axis line
         this.arrow = {
             x: playW * 0.25,
             y: this.centerY,
@@ -147,24 +134,47 @@ class Level {
     }
 
     handleCanvasClick(e) {
-        const rect = e.target.getBoundingClientRect ? e.target.getBoundingClientRect() : { left: 0, top: 0 };
-        const clickX = e.clientX - rect.left;
-        const clickY = e.clientY - rect.top;
-        const btn = this.backBtnBounds;
-
-        if (clickX >= btn.x && clickX <= btn.x + btn.width && clickY >= btn.y && clickY <= btn.y + btn.height) {
+        const rect = e.target && e.target.getBoundingClientRect
+            ? e.target.getBoundingClientRect() : { left: 0, top: 0 };
+        const cx = e.clientX - rect.left;
+        const cy = e.clientY - rect.top;
+        const b = this.backBtnBounds;
+        if (cx >= b.x && cx <= b.x + b.width && cy >= b.y && cy <= b.y + b.height) {
             window.history.back();
         }
     }
 
-    resize(w, h) {
-        this.canvasWidth = w;
-        this.canvasHeight = h;
-        this.init();
+    resize(w, h) { this.canvasWidth = w; this.canvasHeight = h; this.init(); }
+
+    /* ------------------------------------------------------------------
+       COORDINATE TRANSFORMS
+       ------------------------------------------------------------------ */
+    worldToOpticLocal(worldX, worldY, optic) {
+        const dx = worldX - optic.x;
+        const dy = worldY - optic.y;
+        const angle = (optic.rotation || 0) * Math.PI / 180;
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return {
+            x: dx * cos + dy * sin,
+            y: -dx * sin + dy * cos
+        };
     }
 
+    opticLocalToWorld(localX, localY, optic) {
+        const angle = (optic.rotation || 0) * Math.PI / 180;
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return {
+            x: optic.x + localX * cos - localY * sin,
+            y: optic.y + localX * sin + localY * cos
+        };
+    }
+
+    /* ------------------------------------------------------------------
+       OPTIC INTERACTION
+       ------------------------------------------------------------------ */
     getInteractableOptic() {
-        if (this.placedOptics.length === 0) return null;
         let closest = null, minDist = Infinity;
         for (const opt of this.placedOptics) {
             const dist = Math.hypot(this.arrow.x - opt.x, this.arrow.y - opt.y);
@@ -175,171 +185,187 @@ class Level {
 
     dropOptic(type) {
         if (this.inventory[type] <= 0) return;
-        
-        // Placed directly centered on the central axis line passing through the middle
         this.placedOptics.push({
-            type,
-            x: this.arrow.x,
-            y: this.centerY,
-            focalLength: OPTIC_TYPES[type].focalLength,
-            rotation: 0,
+            type, x: this.arrow.x, y: this.centerY,
+            focalLength: OPTIC_TYPES[type].focalLength, rotation: 0,
         });
         this.inventory[type]--;
     }
 
     rotateClosestOptic(direction) {
-        const target = this.getInteractableOptic();
-        if (target) {
-            target.optic.rotation = (target.optic.rotation + (direction * ROTATE_STEP_DEG) + 360) % 360;
-        }
+        const t = this.getInteractableOptic();
+        if (!t) return;
+        t.optic.rotation = (t.optic.rotation + direction * 15 + 360) % 360;
     }
 
     cycleClosestRadius() {
-        const target = this.getInteractableOptic();
-        if (!target || target.optic.type === 'planeMirror') return;
-        let nextAbsF = Math.abs(target.optic.focalLength) + FOCAL_STEP;
-        if (nextAbsF > FOCAL_MAX) nextAbsF = FOCAL_MIN;
-        target.optic.focalLength = nextAbsF * Math.sign(target.optic.focalLength);
+        const t = this.getInteractableOptic();
+        if (!t || t.optic.type === 'planeMirror') return;
+        let nextF = Math.abs(t.optic.focalLength) + FOCAL_STEP;
+        if (nextF > FOCAL_MAX) nextF = FOCAL_MIN;
+        t.optic.focalLength = nextF * Math.sign(t.optic.focalLength);
     }
 
     pickUpClosestOptic() {
-        const target = this.getInteractableOptic();
-        if (!target) return;
-        const idx = this.placedOptics.indexOf(target.optic);
+        const t = this.getInteractableOptic();
+        if (!t) return;
+        const idx = this.placedOptics.indexOf(t.optic);
         if (idx !== -1) {
-            this.inventory[target.optic.type]++;
+            this.inventory[t.optic.type]++;
             this.placedOptics.splice(idx, 1);
             this.calculatedImage = null;
             this.rayPaths = [];
         }
     }
 
-    checkPickups() {
-        this.pickups.forEach((p) => {
-            if (!p.collected && Math.hypot(this.arrow.x - p.x, this.arrow.y - p.y) < 45) {
-                p.collected = true;
-                this.inventory[p.opticType]++;
-            }
-        });
-    }
-
-    checkWinCondition() {
-        const ez = this.exitZone;
-        if (
-            this.arrow.x >= ez.x &&
-            this.arrow.x <= ez.x + ez.width &&
-            this.arrow.y >= ez.y - 40 &&
-            this.arrow.y <= ez.y + ez.height + 40
-        ) {
-            this.isWin = true;
-        }
-    }
-
     teleportArrowToImage() {
-        if (!this.calculatedImage) return;
+        if (!this.calculatedImage) return; // Can now teleport to ALL images
         const playW = this.canvasWidth - this.sidebarWidth;
+        // The image object has the calculated x,y world coordinates of its base
         this.arrow.x = Math.min(playW - 30, Math.max(30, this.calculatedImage.x));
-        this.arrow.y = this.centerY;
+        this.arrow.y = this.calculatedImage.y;
         this.arrow.height = Math.max(20, Math.min(80, this.calculatedImage.height));
         this.arrow.isInverted = this.calculatedImage.isInverted;
     }
 
+    checkWinCondition() {
+        const ez = this.exitZone;
+        if (this.arrow.x >= ez.x && this.arrow.x <= ez.x + ez.width &&
+            this.arrow.y >= ez.y - 40 && this.arrow.y <= ez.y + ez.height + 40) {
+            this.isWin = true;
+        }
+    }
+
+    /* ==================================================================
+       CORE OPTICS — Thin lens / mirror equation with proper ray diagram
+       ================================================================== */
     calculateOptics() {
         this.rayPaths = [];
         this.calculatedImage = null;
         if (this.placedOptics.length === 0) return;
 
-        const playerTopY = this.arrow.y - (this.arrow.isInverted ? -this.arrow.height : this.arrow.height);
-        let posX = this.arrow.x;
-        let posY = playerTopY;
+        // Current base and tip start as the arrow itself
+        const dir = this.arrow.isInverted ? -1 : 1;
+        let currentBase = { x: this.arrow.x, y: this.arrow.y };
+        let currentTip = { x: this.arrow.x, y: this.arrow.y - this.arrow.height * dir };
+        
+        let h = this.arrow.height;
+        let inv = this.arrow.isInverted;
 
-        for (const optic of this.placedOptics) {
-            const rad = (optic.rotation * Math.PI) / 180;
-            const normX = Math.cos(rad);
-            const normY = Math.sin(rad);
-            const opticCenterY = optic.y;
+        // Sort optics by physical distance from the current object base
+        const optics = [...this.placedOptics].sort(
+            (a, b) => Math.hypot(a.x - currentBase.x, a.y - currentBase.y) - 
+                      Math.hypot(b.x - currentBase.x, b.y - currentBase.y)
+        );
 
-            if (optic.type === 'planeMirror') {
-                const vx = posX - optic.x;
-                const vy = posY - opticCenterY;
-                const dot = vx * normX + vy * normY;
+        for (const optic of optics) {
+            const baseLocal = this.worldToOpticLocal(currentBase.x, currentBase.y, optic);
+            const tipLocal = this.worldToOpticLocal(currentTip.x, currentTip.y, optic);
 
-                const imgX = optic.x + (vx - 2 * dot * normX);
-                const imgY = opticCenterY + (vy - 2 * dot * normY);
+            const u = Math.abs(baseLocal.x);
+            if (u < 1) continue; // practically on top of it
 
-                const hit1 = { x: optic.x - normY * 20, y: opticCenterY + normX * 20 };
-                const hit2 = { x: optic.x + normY * 20, y: opticCenterY - normX * 20 };
+            const objLeft = baseLocal.x < 0; 
+            const f = optic.focalLength;
+            const type = optic.type;
 
-                this.rayPaths.push({
-                    rays: [
-                        [
-                            { from: { x: posX, y: posY }, to: hit1, isVirtual: false },
-                            { from: hit1, to: { x: imgX, y: imgY }, isVirtual: true }
-                        ],
-                        [
-                            { from: { x: posX, y: posY }, to: hit2, isVirtual: false },
-                            { from: hit2, to: { x: imgX, y: imgY }, isVirtual: true }
-                        ]
-                    ]
-                });
+            const isPlane = type === 'planeMirror';
+            const isLens = type === 'concaveLens' || type === 'convexLens';
+            const isMirror = type === 'concaveMirror' || type === 'convexMirror';
 
-                this.calculatedImage = {
-                    x: imgX,
-                    y: this.centerY,
-                    height: this.arrow.height,
-                    isInverted: this.arrow.isInverted
-                };
-            } else {
-                const dx = posX - optic.x;
-                const dy = posY - opticCenterY;
-                const u_o = Math.hypot(dx, dy);
-                if (u_o < 1e-3) continue;
+            const hObj = tipLocal.y - baseLocal.y; // height relative to base in local Y
 
-                const f = optic.focalLength;
-                const isLens = optic.type.toLowerCase().includes('lens');
+            let imgBaseLocalX, imgTipLocalY, isReal, imgInverted, imgHeight;
 
-                let u_i;
-                if (isLens) {
-                    u_i = (f * u_o) / (u_o - f);
+            if (isPlane) {
+                // Plane mirror
+                imgBaseLocalX = -baseLocal.x; // reflection across Y axis
+                imgTipLocalY = tipLocal.y;
+                isReal = false;
+                imgInverted = inv; 
+                imgHeight = h;
+            } else if (isLens || isMirror) {
+                // Lens / Mirror Equation
+                let v;
+                const denom = u - f;
+                if (Math.abs(denom) < 0.01) {
+                    v = 100000;
                 } else {
-                    u_i = (f * u_o) / (u_o - f);
+                    v = (f * u) / denom;
                 }
 
-                const magnification = isLens ? (u_i / u_o) : (-u_i / u_o);
-                const imgHeight = Math.min(80, Math.max(20, Math.abs(magnification) * this.arrow.height));
-                const isInverted = magnification < 0 ? !this.arrow.isInverted : this.arrow.isInverted;
+                const m = -(v / u);
+                const hImg = hObj * m;
+                isReal = v > 0;
 
-                const dirX = dx / u_o;
-                const dirY = dy / u_o;
-                const imgX = optic.x + dirX * Math.abs(u_i);
-                const imgY = opticCenterY + dirY * Math.abs(u_i);
+                if (isLens) {
+                    imgBaseLocalX = isReal ? (objLeft ? v : -v) : (objLeft ? -Math.abs(v) : Math.abs(v));
+                } else { 
+                    imgBaseLocalX = isReal ? (objLeft ? -v : v) : (objLeft ? Math.abs(v) : -Math.abs(v));
+                }
 
-                const hit1 = { x: optic.x - normY * 20, y: opticCenterY + normX * 20 };
-                const hit2 = { x: optic.x + normY * 20, y: opticCenterY - normX * 20 };
-
-                this.rayPaths.push({
-                    rays: [
-                        [
-                            { from: { x: posX, y: posY }, to: hit1, isVirtual: false },
-                            { from: hit1, to: { x: imgX, y: imgY }, isVirtual: false }
-                        ],
-                        [
-                            { from: { x: posX, y: posY }, to: hit2, isVirtual: false },
-                            { from: hit2, to: { x: imgX, y: imgY }, isVirtual: false }
-                        ]
-                    ]
-                });
-
-                this.calculatedImage = {
-                    x: imgX,
-                    y: this.centerY,
-                    height: imgHeight,
-                    isInverted: isInverted
-                };
+                imgTipLocalY = baseLocal.y + hImg;
+                imgHeight = Math.min(120, Math.max(10, Math.abs(hImg)));
+                imgInverted = inv !== (m < 0);
+            } else {
+                continue;
             }
+
+            // Calculate world points for the image
+            const imgBaseWorld = this.opticLocalToWorld(imgBaseLocalX, baseLocal.y, optic);
+            const imgTipWorld = this.opticLocalToWorld(imgBaseLocalX, imgTipLocalY, optic);
+
+            // ---- TEXTBOOK RAY DIAGRAM ----
+            // Ray 1: Parallel to optic's axis. Hits surface at local x=0, local y=tipLocal.y
+            const hit1Local = { x: 0, y: tipLocal.y };
+            // Ray 2: Through optical center. Hits surface at local x=0, local y=baseLocal.y
+            const hit2Local = { x: 0, y: baseLocal.y }; 
+
+            const hit1World = this.opticLocalToWorld(hit1Local.x, hit1Local.y, optic);
+            const hit2World = this.opticLocalToWorld(hit2Local.x, hit2Local.y, optic);
+
+            // Function to generate the physical and virtual rays
+            const pushRay = (hitWorld) => {
+                const segs = [];
+                // Incident ray
+                segs.push({ from: { ...currentTip }, to: { ...hitWorld }, isVirtual: false });
+                
+                if (isReal) {
+                    // Refracted/Reflected ray goes straight to the real image
+                    segs.push({ from: { ...hitWorld }, to: { ...imgTipWorld }, isVirtual: false });
+                    // Extend the ray past the real image
+                    const dx = imgTipWorld.x - hitWorld.x;
+                    const dy = imgTipWorld.y - hitWorld.y;
+                    segs.push({ from: { ...imgTipWorld }, to: { x: imgTipWorld.x + dx * 2, y: imgTipWorld.y + dy * 2 }, isVirtual: false });
+                } else {
+                    // Virtual image: dashed backward ray
+                    segs.push({ from: { ...hitWorld }, to: { ...imgTipWorld }, isVirtual: true }); 
+                    // Actual real ray diverges away from the virtual image
+                    const dx = hitWorld.x - imgTipWorld.x;
+                    const dy = hitWorld.y - imgTipWorld.y;
+                    segs.push({ from: { ...hitWorld }, to: { x: hitWorld.x + dx * 10, y: hitWorld.y + dy * 10 }, isVirtual: false });
+                }
+                return segs;
+            };
+
+            this.rayPaths.push({ rays: [pushRay(hit1World), pushRay(hit2World)] });
+
+            this.calculatedImage = {
+                x: imgBaseWorld.x, y: imgBaseWorld.y,
+                tipX: imgTipWorld.x, tipY: imgTipWorld.y,
+                height: imgHeight, isInverted: imgInverted, isVirtual: !isReal
+            };
+
+            currentBase = { ...imgBaseWorld };
+            currentTip = { ...imgTipWorld };
+            h = imgHeight;
+            inv = imgInverted;
         }
     }
 
+    /* ------------------------------------------------------------------
+       INPUT HANDLING
+       ------------------------------------------------------------------ */
     handleAction(binding) {
         switch (binding.action) {
             case 'drop': this.dropOptic(binding.optic); break;
@@ -354,44 +380,62 @@ class Level {
     }
 
     update(keys) {
-        const isKeyPressed = (k) => keys[k] && !this.keyPrev[k];
-
-        for (const key in KEY_BINDINGS) {
-            if (isKeyPressed(key)) this.handleAction(KEY_BINDINGS[key]);
-        }
-        for (const key in KEY_BINDINGS) this.keyPrev[key] = !!keys[key];
-
-        let nextX = this.arrow.x;
-        if (keys['a'] || keys['A'] || keys['ArrowLeft']) nextX -= this.arrow.speed;
-        if (keys['d'] || keys['D'] || keys['ArrowRight']) nextX += this.arrow.speed;
+        const pressed = k => keys[k] && !this.keyPrev[k];
+        for (const key in KEY_BINDINGS) { if (pressed(key)) this.handleAction(KEY_BINDINGS[key]); }
+        for (const key in KEY_BINDINGS) { this.keyPrev[key] = !!keys[key]; }
 
         const playW = this.canvasWidth - this.sidebarWidth;
-        this.arrow.x = Math.min(playW - 25, Math.max(25, nextX));
+        const wallX = playW * 0.5;
+        let nx = this.arrow.x;
 
-        this.checkPickups();
+        if (keys['a'] || keys['A'] || keys['ArrowLeft']) nx -= this.arrow.speed;
+        if (keys['d'] || keys['D'] || keys['ArrowRight']) nx += this.arrow.speed;
+        nx = Math.min(playW - 25, Math.max(25, nx));
+
+        // Solid central wall collision
+        const pr = 18;
+        if (this.walls.some(w => Math.abs(w.x1 - wallX) < 1 && Math.abs(w.x2 - wallX) < 1)) {
+            if (this.arrow.x < wallX && nx >= wallX - pr) nx = wallX - pr;
+            if (this.arrow.x > wallX && nx <= wallX + pr) nx = wallX + pr;
+        }
+
+        this.arrow.x = nx;
         this.checkWinCondition();
         this.calculateOptics();
     }
 
+    /* ==================================================================
+       DRAWING
+       ================================================================== */
     draw(ctx) {
         ctx.save();
-        this.drawBackgroundGrid(ctx);
+        this.drawGrid(ctx);
         this.drawWalls(ctx);
-        this.drawCentralAxis(ctx);
+        this.drawAxis(ctx);
         this.drawExitZone(ctx);
-        this.drawPickups(ctx);
-        this.drawRayPaths(ctx);
+        this.drawRays(ctx);
         this.drawOptics(ctx);
-        this.drawImage(ctx);
-        this.drawObjectArrow(ctx);
-        this.drawTopBarHud(ctx);
-        this.drawRightSideGuide(ctx);
 
+        // Draw image arrow (if calculated)
+        if (this.calculatedImage) {
+            const ci = this.calculatedImage;
+            this.drawArrow(ctx, ci.x, ci.y, ci.tipX, ci.tipY, ci.isVirtual);
+        }
+
+        // Draw object arrow
+        const d = this.arrow.isInverted ? -1 : 1;
+        const tipY = this.arrow.y - this.arrow.height * d;
+        this.drawArrow(ctx, this.arrow.x, this.arrow.y, this.arrow.x, tipY, null);
+
+        this.drawHudBar(ctx);
+        this.drawSidebar(ctx);
         if (this.isWin) this.drawWinBanner(ctx);
+
         ctx.restore();
     }
 
-    drawBackgroundGrid(ctx) {
+    /* ---- Background grid ---- */
+    drawGrid(ctx) {
         ctx.strokeStyle = PALETTE.bgGrid;
         ctx.lineWidth = 1;
         for (let x = 0; x < this.canvasWidth; x += 40) {
@@ -402,19 +446,21 @@ class Level {
         }
     }
 
+    /* ---- Walls ---- */
     drawWalls(ctx) {
         ctx.save();
         ctx.strokeStyle = PALETTE.wall;
         ctx.shadowColor = PALETTE.wallGlow;
         ctx.shadowBlur = 12;
         ctx.lineWidth = 4;
-        this.walls.forEach((w) => {
+        this.walls.forEach(w => {
             ctx.beginPath(); ctx.moveTo(w.x1, w.y1); ctx.lineTo(w.x2, w.y2); ctx.stroke();
         });
         ctx.restore();
     }
 
-    drawCentralAxis(ctx) {
+    /* ---- Principal axis ---- */
+    drawAxis(ctx) {
         ctx.save();
         ctx.strokeStyle = PALETTE.axis;
         ctx.lineWidth = 2;
@@ -426,54 +472,132 @@ class Level {
         ctx.restore();
     }
 
+    /* ---- Exit zone ---- */
     drawExitZone(ctx) {
-        const ez = this.exitZone;
+        const e = this.exitZone;
         ctx.save();
         ctx.strokeStyle = PALETTE.exitBox;
         ctx.fillStyle = 'rgba(255, 0, 85, 0.15)';
         ctx.lineWidth = 2;
         ctx.setLineDash([6, 4]);
-        roundRect(ctx, ez.x, ez.y, ez.width, ez.height, 8);
+        roundRect(ctx, e.x, e.y, e.width, e.height, 8);
         ctx.fill(); ctx.stroke();
-
         ctx.font = 'bold 18px monospace';
         ctx.fillStyle = PALETTE.exitBox;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('EXIT', ez.x + ez.width / 2, ez.y + ez.height / 2);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('EXIT', e.x + e.width / 2, e.y + e.height / 2);
         ctx.restore();
     }
 
-    drawPickups(ctx) {
-        this.pickups.forEach((p) => {
-            if (p.collected) return;
-            ctx.save();
-            ctx.translate(p.x, p.y);
-            ctx.strokeStyle = PALETTE.pickupIcon;
-            ctx.fillStyle = 'rgba(0, 255, 102, 0.15)';
-            ctx.lineWidth = 2.5;
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = PALETTE.pickupIcon;
-
-            ctx.beginPath();
-            this.traceOpticShape(ctx, p.opticType);
-            ctx.stroke();
-            ctx.restore();
-
-            labelChip(ctx, `[Pick Up] ${p.label}`, p.x, p.y - 45, PALETTE.pickupIcon);
+    /* ---- Ray paths ---- */
+    drawRays(ctx) {
+        const colors = [PALETTE.ray1, PALETTE.ray2];
+        this.rayPaths.forEach(stage => {
+            stage.rays.forEach((raySegs, i) => {
+                const color = colors[i] || PALETTE.ray1;
+                raySegs.forEach(seg => {
+                    ctx.save();
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash(seg.isVirtual ? [5, 5] : []);
+                    ctx.globalAlpha = seg.isVirtual ? 0.6 : 1;
+                    ctx.beginPath();
+                    ctx.moveTo(seg.from.x, seg.from.y);
+                    ctx.lineTo(seg.to.x, seg.to.y);
+                    ctx.stroke();
+                    ctx.restore();
+                });
+            });
         });
     }
 
-    drawTopBarHud(ctx) {
+    /* ---- Optic elements ---- */
+    drawOptics(ctx) {
+        this.placedOptics.forEach(opt => {
+            const color = OPTIC_COLORS[opt.type];
+            ctx.save();
+            ctx.translate(opt.x, opt.y);
+            ctx.rotate((opt.rotation || 0) * Math.PI / 180);
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = color;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            this.traceOpticShape(ctx, opt.type);
+            ctx.stroke();
+            ctx.restore();
+        });
+    }
+
+    traceOpticShape(ctx, type) {
+        const H = 90; // Big static height so rays hit it but it doesn't warp!
+        if (type === 'concaveMirror') {
+            ctx.arc(120, 0, 120, 0.85 * Math.PI, 1.15 * Math.PI);
+        } else if (type === 'convexMirror') {
+            ctx.arc(-120, 0, 120, -0.15 * Math.PI, 0.15 * Math.PI);
+        } else if (type === 'planeMirror') {
+            ctx.moveTo(0, -H); ctx.lineTo(0, H);
+        } else if (type === 'concaveLens') {
+            ctx.moveTo(-8, -H); ctx.lineTo(8, -H);
+            ctx.quadraticCurveTo(0, 0, 8, H);
+            ctx.lineTo(-8, H);
+            ctx.quadraticCurveTo(0, 0, -8, -H);
+        } else if (type === 'convexLens') {
+            ctx.ellipse(0, 0, 6, H, 0, 0, Math.PI * 2);
+        }
+    }
+
+    /* ---- Arrow drawing ---- */
+    drawArrow(ctx, baseX, baseY, tipX, tipY, imgState) {
+        ctx.save();
+        ctx.shadowBlur = 12;
+
+        let color = PALETTE.object;
+        if (imgState === false) color = PALETTE.image;
+        else if (imgState === true) color = PALETTE.imageVirtual;
+
+        ctx.shadowColor = color;
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 3;
+
+        if (imgState !== null) {
+            ctx.setLineDash([5, 5]);
+            ctx.globalAlpha = 0.7;
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(baseX, baseY);
+        ctx.lineTo(tipX, tipY);
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+        
+        // Don't try to calculate angle if height is 0
+        if (Math.abs(tipX - baseX) > 0.1 || Math.abs(tipY - baseY) > 0.1) {
+            const angle = Math.atan2(tipY - baseY, tipX - baseX);
+            ctx.beginPath();
+            ctx.moveTo(tipX, tipY);
+            ctx.lineTo(tipX - 12 * Math.cos(angle - Math.PI/6), tipY - 12 * Math.sin(angle - Math.PI/6));
+            ctx.lineTo(tipX - 12 * Math.cos(angle + Math.PI/6), tipY - 12 * Math.sin(angle + Math.PI/6));
+            ctx.fill();
+        }
+
+        ctx.restore();
+    }
+
+    /* ---- HUD top bar ---- */
+    drawHudBar(ctx) {
         ctx.save();
         ctx.font = 'bold 16px monospace';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = PALETTE.hudAccent;
-        ctx.fillText('← Back', 16, 25);
+        ctx.fillText('\u2190 Back', 16, 25);
         ctx.restore();
     }
 
-    drawRightSideGuide(ctx) {
+    /* ---- Right sidebar guide ---- */
+    drawSidebar(ctx) {
         ctx.save();
         const x = this.canvasWidth - this.sidebarWidth + 10;
         const y = 10;
@@ -491,149 +615,57 @@ class Level {
         ctx.fillText('GAME GUIDE', x + 12, y + 25);
 
         ctx.font = '11px monospace';
-
         const lines = [
             '--------------------',
-            'CONTROLS:',
+            'DROP OPTICS:',
             '[1] Concave Mirror',
             '[2] Convex Mirror',
             '[3] Concave Lens',
             '[4] Convex Lens',
             '[5] Plane Mirror',
             '',
-            'INVENTORY COUNT:',
-            `1. Concave : x${this.inventory.concaveMirror}`,
-            `2. Convex  : x${this.inventory.convexMirror}`,
-            `3. Con.Lens: x${this.inventory.concaveLens}`,
-            `4. Cvx.Lens: x${this.inventory.convexLens}`,
+            'INVENTORY:',
+            `1. ConcMir : x${this.inventory.concaveMirror}`,
+            `2. ConvMir : x${this.inventory.convexMirror}`,
+            `3. ConcLen : x${this.inventory.concaveLens}`,
+            `4. ConvLen : x${this.inventory.convexLens}`,
             `5. Plane   : x${this.inventory.planeMirror}`,
             '',
             'ACTIONS:',
-            '[Q] Rotate Anti-CW',
-            '[E] Rotate Clockwise',
-            '[C] Change Curvature',
-            '[T] Teleport to Image',
-            '[F] Pick Up Item',
-            '[R] Reset Level',
+            '[Q/E] Rotate optic',
+            '[C] Change curvature',
+            '[T] Teleport to image',
+            '[F] Pick up optic',
+            '[R] Reset level',
+            '',
+            'RULES:',
+            'Orange = real image [T]',
+            'Red = virtual (no [T])',
         ];
 
-        let lineY = y + 44;
-        lines.forEach((line) => {
+        let ly = y + 44;
+        lines.forEach(line => {
             if (line.startsWith('[')) ctx.fillStyle = '#00ff66';
             else if (line.endsWith(':')) ctx.fillStyle = '#00e5ff';
             else if (line.includes(': x')) ctx.fillStyle = '#ffea00';
+            else if (line.startsWith('Orange')) ctx.fillStyle = PALETTE.image;
+            else if (line.startsWith('Red')) ctx.fillStyle = PALETTE.imageVirtual;
             else ctx.fillStyle = PALETTE.hudText;
-
-            ctx.fillText(line, x + 12, lineY);
-            lineY += 16;
+            ctx.fillText(line, x + 12, ly);
+            ly += 16;
         });
-
         ctx.restore();
     }
 
-    drawRayPaths(ctx) {
-        this.rayPaths.forEach((stage) => {
-            const colors = [PALETTE.rayFocus, PALETTE.rayCenter];
-            stage.rays.forEach((raySegs, i) => {
-                const color = colors[i] || PALETTE.rayFocus;
-                raySegs.forEach((seg) => {
-                    ctx.save();
-                    ctx.strokeStyle = color;
-                    ctx.lineWidth = 2;
-                    if (seg.isVirtual) ctx.setLineDash([5, 5]);
-                    ctx.beginPath();
-                    ctx.moveTo(seg.from.x, seg.from.y);
-                    ctx.lineTo(seg.to.x, seg.to.y);
-                    ctx.stroke();
-                    ctx.restore();
-                });
-            });
-        });
-    }
-
-    drawOptics(ctx) {
-        this.placedOptics.forEach((opt) => {
-            const color = OPTIC_COLORS[opt.type];
-            ctx.save();
-            ctx.translate(opt.x, opt.y);
-            ctx.rotate(((opt.rotation || 0) * Math.PI) / 180);
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = color;
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 3;
-
-            ctx.beginPath();
-            this.traceOpticShape(ctx, opt.type);
-            ctx.stroke();
-            ctx.restore();
-        });
-    }
-
-    traceOpticShape(ctx, type) {
-        // Correctly centered directly intersecting the axis line passing through the middle
-        if (type === 'concaveMirror') {
-            ctx.arc(0, 0, 30, Math.PI * 0.75, Math.PI * 1.25);
-        } else if (type === 'convexMirror') {
-            ctx.arc(0, 0, 30, Math.PI * 1.75, Math.PI * 0.25);
-        } else if (type === 'planeMirror') {
-            ctx.moveTo(0, -30); ctx.lineTo(0, 30);
-        } else if (type === 'concaveLens') {
-            ctx.moveTo(-8, -35); ctx.lineTo(8, -35);
-            ctx.quadraticCurveTo(0, 0, 8, 35); ctx.lineTo(-8, 35);
-            ctx.quadraticCurveTo(0, 0, -8, -35);
-        } else if (type === 'convexLens') {
-            ctx.ellipse(0, 0, 6, 30, 0, 0, Math.PI * 2);
-        }
-    }
-
-    drawImage(ctx) {
-        if (!this.calculatedImage) return;
-        const img = this.calculatedImage;
-        const topY = img.y - (img.isInverted ? -img.height : img.height);
-
-        ctx.save();
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = PALETTE.image;
-        ctx.strokeStyle = PALETTE.image;
-        ctx.lineWidth = 2;
-
-        ctx.beginPath(); ctx.moveTo(img.x, img.y); ctx.lineTo(img.x, topY); ctx.stroke();
-        labelChip(ctx, 'image [T]', img.x, img.y - img.height - 15, PALETTE.image);
-        ctx.restore();
-    }
-
-    drawObjectArrow(ctx) {
-        const dir = this.arrow.isInverted ? -1 : 1;
-        const topY = this.arrow.y - (this.arrow.height * dir);
-
-        ctx.save();
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = PALETTE.object;
-        ctx.strokeStyle = PALETTE.object;
-        ctx.fillStyle = PALETTE.object;
-        ctx.lineWidth = 3;
-
-        ctx.beginPath(); ctx.moveTo(this.arrow.x, this.arrow.y); ctx.lineTo(this.arrow.x, topY); ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(this.arrow.x - 5, topY + (8 * dir));
-        ctx.lineTo(this.arrow.x, topY);
-        ctx.lineTo(this.arrow.x + 5, topY + (8 * dir));
-        ctx.fill();
-
-        labelChip(ctx, 'You', this.arrow.x, this.arrow.y + 20, PALETTE.object);
-        ctx.restore();
-    }
-
+    /* ---- Win banner ---- */
     drawWinBanner(ctx) {
         ctx.save();
         ctx.fillStyle = 'rgba(0,0,0,0.88)';
         ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-
         ctx.font = 'bold 36px monospace';
         ctx.fillStyle = '#00ff66';
         ctx.textAlign = 'center';
         ctx.fillText('ESCAPE SUCCESSFUL!', this.canvasWidth / 2, this.canvasHeight / 2 - 10);
-
         ctx.font = '16px monospace';
         ctx.fillStyle = '#ffffff';
         ctx.fillText('Press [R] to replay level', this.canvasWidth / 2, this.canvasHeight / 2 + 30);

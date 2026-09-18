@@ -30,9 +30,12 @@ export function initPhysics() {
 
     Composite.add(world, [ground, ceiling, leftWall, rightWall]);
 
-    // 1. Create Free-Floating Boxes A, B, C
+    // 1. Create Free-Floating Boxes
+    const scale = window.innerWidth < 800 ? window.innerWidth / 1000 : 1;
+    const boxSize = window.innerWidth < 800 ? CONFIG.boxSize * 0.7 : CONFIG.boxSize;
+
     const boxBodies = CONFIG.boxesData.map(data => {
-        const body = Bodies.rectangle(window.innerWidth / 2 + data.xOffset, data.y, CONFIG.boxSize, CONFIG.boxSize, {
+        const body = Bodies.rectangle(window.innerWidth / 2 + (data.xOffset * scale), data.y, boxSize, boxSize, {
             restitution: 0.8,
             frictionAir: 0.02,
             render: {
