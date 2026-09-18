@@ -1,0 +1,26 @@
+{
+  "other": [
+    { 
+      "title": "Ray Optics Simulation", 
+      "url": "https://phydemo.app/ray-optics/simulator/" 
+    },
+    { 
+      "title": "PhET Interactive Simulations", 
+      "url": "https://phet.colorado.edu/" 
+    },
+    { 
+      "title": "The Feynman Lectures", 
+      "url": "https://www.feynmanlectures.caltech.edu/" 
+    },
+    { 
+      "title": "MIT OpenCourseWare", 
+      "url": "https://ocw.mit.edu/" 
+    }
+  ],
+  "mine": [
+    { 
+      "title": "Rayway", 
+      "url": "rayway/index.html" 
+    }
+  ]
+}

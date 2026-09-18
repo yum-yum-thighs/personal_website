@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rayway - Level Select</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        /* Clean Plain Text Link */
+        .back-link {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            color: #00ffff;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+
+        .back-link:hover {
+            color: #ffffff;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #00ffff;
+            margin-bottom: 50px;
+            letter-spacing: 6px;
+        }
+
+        .level-grid {
+            display: flex;
+            gap: 25px;
+        }
+
+        /* Plain Flat Text Button */
+        .level-box {
+            color: #ff00ff;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 10px;
+        }
+
+        .level-box:hover {
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <a class="back-link" href="../../index.html">← back</a>
+
+    <h1>Rayway</h1>
+
+    <div class="level-grid">
+        <a class="level-box" href="levels/level_1.html">L1</a>
+    </div>
+
+</body>
+</html>

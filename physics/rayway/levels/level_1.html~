@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rayway - Level 1</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: monospace;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #00ffff;
+            text-decoration: none;
+            font-size: 1rem;
+            z-index: 10;
+        }
+
+        .back-link:hover {
+            color: #ff00ff;
+        }
+
+        .level-title {
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+            color: #00ffff;
+            letter-spacing: 2px;
+        }
+
+        canvas {
+            display: block;
+            background: #000000;
+        }
+    </style>
+</head>
+<body>
+
+    <a class="back-link" href="../index.html">← level select</a>
+
+    <div class="level-title">LEVEL 1</div>
+
+    <canvas id="gameCanvas" width="960" height="540"></canvas>
+
+    <script src="../js/optics.js"></script>
+    <script src="../js/player.js"></script>
+    <script src="../js/level.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+</html>

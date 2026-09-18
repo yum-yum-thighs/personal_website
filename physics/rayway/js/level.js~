@@ -1,0 +1,523 @@
+// ---- Neon Visual Palette & Config -----------------------------------------
+
+const OPTIC_COLORS = {
+    concaveMirror: '#00ff66',
+    convexMirror: '#00e5ff',
+    concaveLens: '#b026ff',
+    convexLens: '#ff2bd6',
+    planeMirror: '#00ffff',
+};
+
+const PALETTE = {
+    bgGrid: 'rgba(255, 255, 255, 0.03)',
+    wall: '#3a4466',
+    wallGlow: 'rgba(58, 68, 102, 0.5)',
+    axis: '#00ff66',
+    rayFocus: '#ff0055',
+    rayCenter: '#00e5ff',
+    hitMark: '#ffff00',
+    focalPoint: '#b892ff',
+    centerPoint: '#ffea00',
+    convergePoint: '#ffffff',
+    image: '#ff9100',
+    object: '#00e5ff',
+    exitBox: '#ff0055',
+    pickupX: '#ffea00',
+    hudBg: 'rgba(10, 12, 20, 0.88)',
+    hudBorder: 'rgba(255, 255, 255, 0.15)',
+    hudText: '#ffffff',
+    hudAccent: '#00e5ff',
+};
+
+const OPTIC_TYPES = {
+    concaveMirror: { focalLength: 100 },
+    convexMirror: { focalLength: -100 },
+    concaveLens: { focalLength: -100 },
+    convexLens: { focalLength: 100 },
+    planeMirror: { focalLength: 0 },
+};
+
+const ARROW_HEIGHT = 40;
+const ARROW_SPEED = 4;
+const INTERACT_RADIUS = 100;
+
+const KEY_BINDINGS = {
+    '1': { action: 'drop', optic: 'concaveMirror' },
+    '2': { action: 'drop', optic: 'convexMirror' },
+    '3': { action: 'drop', optic: 'concaveLens' },
+    '4': { action: 'drop', optic: 'convexLens' },
+    '5': { action: 'drop', optic: 'planeMirror' },
+    e: { action: 'rotate' }, E: { action: 'rotate' },
+    c: { action: 'cycleFocalLength' }, C: { action: 'cycleFocalLength' },
+    t: { action: 'teleportToImage' }, T: { action: 'teleportToImage' },
+    f: { action: 'pickUp' }, F: { action: 'pickUp' },
+    r: { action: 'reset' }, R: { action: 'reset' },
+    Escape: { action: 'back' },
+};
+
+function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+}
+
+function labelChip(ctx, text, x, y, color) {
+    ctx.save();
+    ctx.font = '11px monospace';
+    const w = ctx.measureText(text).width + 12;
+    ctx.fillStyle = 'rgba(10, 12, 20, 0.85)';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    roundRect(ctx, x - w / 2, y - 8, w, 16, 4);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x, y);
+    ctx.restore();
+}
+
+class Level {
+    constructor(levelNum, canvasWidth = window.innerWidth, canvasHeight = window.innerHeight) {
+        this.number = levelNum;
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
+        this.keyPrev = {};
+        this.isWin = false;
+        this.init();
+    }
+
+    init() {
+        this.isWin = false;
+        const w = this.canvasWidth;
+        const h = this.canvasHeight;
+
+        // Level Map Layout matching drawing
+        this.walls = [
+            // Outer Frame
+            { x1: 20, y1: 50, x2: w - 20, y2: 50 },
+            { x1: 20, y1: h - 20, x2: w - 20, y2: h - 20 },
+            { x1: 20, y1: 50, x2: 20, y2: h - 20 },
+            { x1: w - 20, y1: 50, x2: w - 20, y2: h - 20 },
+
+            // Inner Dividers
+            { x1: 20, y1: h * 0.5, x2: w - 20, y2: h * 0.5 },              // Middle Horizontal
+            { x1: w * 0.28, y1: 50, x2: w * 0.28, y2: h * 0.5 },          // Upper-Left Vertical
+            { x1: w * 0.45, y1: h * 0.5, x2: w * 0.45, y2: h - 20 },       // Lower Center Vertical
+            { x1: w * 0.28, y1: h * 0.25, x2: w - 20, y2: h * 0.25 },     // Upper-Right Platform
+        ];
+
+        // Pickups marked as 'X' in sketch
+        this.pickups = [
+            { id: 1, x: w * 0.22, y: h - 50, opticType: 'concaveMirror', collected: false, label: 'Concave Mirror' },
+            { id: 2, x: w * 0.60, y: h * 0.5 - 20, opticType: 'convexLens', collected: false, label: 'Convex Lens' },
+        ];
+
+        // Exit door area in top right
+        this.exitZone = {
+            x: w * 0.82,
+            y: 65,
+            width: w * 0.14,
+            height: h * 0.25 - 75,
+        };
+
+        // Inventory starts with ZERO items (must find at 'X')
+        this.inventory = {
+            concaveMirror: 0,
+            convexMirror: 0,
+            concaveLens: 0,
+            convexLens: 0,
+            planeMirror: 0,
+        };
+
+        this.placedOptics = [];
+        this.calculatedImage = null;
+        this.rayPaths = [];
+
+        // Player starting arrow (bottom left room)
+        this.arrow = {
+            x: 80,
+            y: h - 20,
+            height: ARROW_HEIGHT,
+            speed: ARROW_SPEED,
+            isInverted: false,
+            floorY: h - 20,
+        };
+
+        // Default optical axis aligned with player floor
+        this.principalAxisY = this.arrow.floorY;
+    }
+
+    resize(w, h) {
+        this.canvasWidth = w;
+        this.canvasHeight = h;
+        this.init();
+    }
+
+    getInteractableOptic() {
+        if (this.placedOptics.length === 0) return null;
+        let closest = null, minDist = Infinity;
+        for (const opt of this.placedOptics) {
+            const dist = Math.hypot(this.arrow.x - opt.x, this.arrow.y - opt.y);
+            if (dist < minDist) { minDist = dist; closest = opt; }
+        }
+        return (closest && minDist < INTERACT_RADIUS) ? { optic: closest } : null;
+    }
+
+    dropOptic(type) {
+        if (this.inventory[type] <= 0) return;
+        const dropX = Math.min(this.canvasWidth - 50, this.arrow.x + 120);
+        this.placedOptics.push({
+            type,
+            x: dropX,
+            y: this.arrow.y,
+            focalLength: OPTIC_TYPES[type].focalLength,
+            rotation: 0,
+            F: { x: 0, y: 0 },
+            C: { x: 0, y: 0 },
+        });
+        this.inventory[type]--;
+    }
+
+    pickUpClosestOptic() {
+        const target = this.getInteractableOptic();
+        if (!target) return;
+        const idx = this.placedOptics.indexOf(target.optic);
+        if (idx !== -1) {
+            this.inventory[target.optic.type]++;
+            this.placedOptics.splice(idx, 1);
+            this.calculatedImage = null;
+            this.rayPaths = [];
+        }
+    }
+
+    checkPickups() {
+        this.pickups.forEach((p) => {
+            if (!p.collected && Math.hypot(this.arrow.x - p.x, this.arrow.y - p.y) < 40) {
+                p.collected = true;
+                this.inventory[p.opticType]++;
+            }
+        });
+    }
+
+    checkWinCondition() {
+        const ez = this.exitZone;
+        if (
+            this.arrow.x >= ez.x &&
+            this.arrow.x <= ez.x + ez.width &&
+            this.arrow.y >= ez.y &&
+            this.arrow.y <= ez.y + ez.height + 40
+        ) {
+            this.isWin = true;
+        }
+    }
+
+    teleportArrowToImage() {
+        if (!this.calculatedImage) return;
+        this.arrow.x = Math.min(this.canvasWidth - 40, Math.max(40, this.calculatedImage.x));
+        this.arrow.y = this.calculatedImage.y;
+        this.arrow.floorY = this.calculatedImage.y;
+        this.arrow.height = Math.max(20, Math.min(80, this.calculatedImage.height));
+        this.arrow.isInverted = this.calculatedImage.isInverted;
+    }
+
+    calculateOptics() {
+        this.rayPaths = [];
+        this.calculatedImage = null;
+        if (this.placedOptics.length === 0) return;
+
+        const sortedOptics = [...this.placedOptics].sort((a, b) => a.x - b.x);
+        let signedHeight = this.arrow.isInverted ? -this.arrow.height : this.arrow.height;
+        let posX = this.arrow.x;
+        let posY = this.arrow.y - signedHeight;
+
+        sortedOptics.forEach((optic) => {
+            const f = optic.focalLength;
+            optic.F = { x: optic.x - f, y: optic.y };
+            optic.C = { x: optic.x - f * 2, y: optic.y };
+        });
+
+        for (const optic of sortedOptics) {
+            if (optic.x <= posX) continue;
+
+            const u = optic.x - posX;
+            const f = optic.focalLength;
+            const isMirror = optic.type.toLowerCase().includes('mirror');
+
+            if (Math.abs(u - f) < 1e-4) continue;
+
+            const v = (f * u) / (u - f);
+            const M = -v / u;
+            const imgX = isMirror ? optic.x - v : optic.x + v;
+            const imgSignedH = M * signedHeight;
+
+            const objTop = { x: posX, y: posY };
+            const imgTop = { x: imgX, y: optic.y - imgSignedH };
+            const hit1 = { x: optic.x, y: posY };
+            const hit2 = { x: optic.x, y: imgTop.y };
+
+            this.rayPaths.push({
+                hits: [hit1, hit2],
+                imgTop,
+                rays: [
+                    [{ from: objTop, to: hit1, isVirtual: false }, { from: hit1, to: imgTop, isVirtual: v < 0 }],
+                    [{ from: objTop, to: hit2, isVirtual: false }, { from: hit2, to: imgTop, isVirtual: v < 0 }],
+                ],
+            });
+
+            this.calculatedImage = {
+                x: imgX,
+                y: optic.y,
+                height: Math.abs(imgSignedH),
+                isReal: v > 0,
+                isInverted: imgSignedH < 0,
+            };
+
+            posX = imgX;
+            posY = imgTop.y;
+            signedHeight = imgSignedH;
+        }
+    }
+
+    handleAction(binding) {
+        switch (binding.action) {
+            case 'drop': this.dropOptic(binding.optic); break;
+            case 'teleportToImage': this.teleportArrowToImage(); break;
+            case 'pickUp': this.pickUpClosestOptic(); break;
+            case 'reset': this.init(); break;
+            case 'back': window.history.back(); break;
+        }
+    }
+
+    update(keys) {
+        const isKeyPressed = (k) => keys[k] && !this.keyPrev[k];
+
+        for (const key in KEY_BINDINGS) {
+            if (isKeyPressed(key)) this.handleAction(KEY_BINDINGS[key]);
+        }
+        for (const key in KEY_BINDINGS) this.keyPrev[key] = !!keys[key];
+
+        let nextX = this.arrow.x;
+        if (keys['a'] || keys['A'] || keys['ArrowLeft']) nextX -= this.arrow.speed;
+        if (keys['d'] || keys['D'] || keys['ArrowRight']) nextX += this.arrow.speed;
+        this.arrow.x = Math.min(this.canvasWidth - 30, Math.max(30, nextX));
+
+        this.checkPickups();
+        this.checkWinCondition();
+        this.calculateOptics();
+    }
+
+    draw(ctx) {
+        ctx.save();
+        this.drawBackgroundGrid(ctx);
+        this.drawWalls(ctx);
+        this.drawExitZone(ctx);
+        this.drawPickups(ctx);
+        this.drawRayPaths(ctx);
+        this.drawOptics(ctx);
+        this.drawImage(ctx);
+        this.drawObjectArrow(ctx);
+        this.drawTopBarHud(ctx);
+
+        if (this.isWin) this.drawWinBanner(ctx);
+        ctx.restore();
+    }
+
+    drawBackgroundGrid(ctx) {
+        ctx.strokeStyle = PALETTE.bgGrid;
+        ctx.lineWidth = 1;
+        for (let x = 0; x < this.canvasWidth; x += 40) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, this.canvasHeight); ctx.stroke();
+        }
+        for (let y = 0; y < this.canvasHeight; y += 40) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(this.canvasWidth, y); ctx.stroke();
+        }
+    }
+
+    drawWalls(ctx) {
+        ctx.save();
+        ctx.strokeStyle = PALETTE.wall;
+        ctx.shadowColor = PALETTE.wallGlow;
+        ctx.shadowBlur = 8;
+        ctx.lineWidth = 4;
+        this.walls.forEach((w) => {
+            ctx.beginPath(); ctx.moveTo(w.x1, w.y1); ctx.lineTo(w.x2, w.y2); ctx.stroke();
+        });
+        ctx.restore();
+    }
+
+    drawExitZone(ctx) {
+        const ez = this.exitZone;
+        ctx.save();
+        ctx.strokeStyle = PALETTE.exitBox;
+        ctx.fillStyle = 'rgba(255, 0, 85, 0.15)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 4]);
+        roundRect(ctx, ez.x, ez.y, ez.width, ez.height, 8);
+        ctx.fill(); ctx.stroke();
+
+        ctx.font = 'bold 18px monospace';
+        ctx.fillStyle = PALETTE.exitBox;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('EXIT', ez.x + ez.width / 2, ez.y + ez.height / 2);
+        ctx.restore();
+    }
+
+    drawPickups(ctx) {
+        this.pickups.forEach((p) => {
+            if (p.collected) return;
+            ctx.save();
+            ctx.strokeStyle = PALETTE.pickupX;
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = PALETTE.pickupX;
+
+            const s = 12;
+            ctx.beginPath();
+            ctx.moveTo(p.x - s, p.y - s); ctx.lineTo(p.x + s, p.y + s);
+            ctx.moveTo(p.x + s, p.y - s); ctx.lineTo(p.x - s, p.y + s);
+            ctx.stroke();
+
+            labelChip(ctx, `[X] Pickup ${p.label}`, p.x, p.y - 22, PALETTE.pickupX);
+            ctx.restore();
+        });
+    }
+
+    drawTopBarHud(ctx) {
+        ctx.save();
+        const padding = 16, h = 34, y = 10;
+        ctx.font = '600 12px monospace';
+        ctx.textBaseline = 'middle';
+
+        // Left Controls
+        const leftText = '‹ [Esc] Back  |  [T] Teleport  |  [F] Pick Up  |  [R] Reset';
+        const leftW = ctx.measureText(leftText).width + 24;
+        ctx.fillStyle = PALETTE.hudBg;
+        ctx.strokeStyle = PALETTE.hudBorder;
+        roundRect(ctx, padding, y, leftW, h, 8);
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = PALETTE.hudText;
+        ctx.fillText(leftText, padding + 12, y + h / 2);
+
+        // Right Inventory
+        let invText = 'Inventory: ';
+        let total = 0;
+        for (const k in this.inventory) {
+            if (this.inventory[k] > 0) {
+                invText += ` [${k}: ${this.inventory[k]}]`;
+                total += this.inventory[k];
+            }
+        }
+        if (total === 0) invText += 'Empty (Collect "X" items)';
+
+        const rightW = ctx.measureText(invText).width + 24;
+        const rightX = this.canvasWidth - padding - rightW;
+        roundRect(ctx, rightX, y, rightW, h, 8);
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = PALETTE.hudAccent;
+        ctx.fillText(invText, rightX + 12, y + h / 2);
+
+        ctx.restore();
+    }
+
+    drawRayPaths(ctx) {
+        this.rayPaths.forEach((stage) => {
+            const colors = [PALETTE.rayFocus, PALETTE.rayCenter];
+            stage.rays.forEach((raySegs, i) => {
+                const color = colors[i] || PALETTE.rayFocus;
+                raySegs.forEach((seg) => {
+                    ctx.save();
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    if (seg.isVirtual) ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(seg.from.x, seg.from.y);
+                    ctx.lineTo(seg.to.x, seg.to.y);
+                    ctx.stroke();
+                    ctx.restore();
+                });
+            });
+        });
+    }
+
+    drawOptics(ctx) {
+        this.placedOptics.forEach((opt) => {
+            const color = OPTIC_COLORS[opt.type];
+            ctx.save();
+            ctx.translate(opt.x, opt.y);
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = color;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+
+            ctx.beginPath();
+            if (opt.type.includes('Lens')) {
+                ctx.ellipse(0, -25, 8, 30, 0, 0, Math.PI * 2);
+            } else {
+                ctx.arc(20, -25, 40, Math.PI - 0.7, Math.PI + 0.7);
+            }
+            ctx.stroke();
+            ctx.restore();
+        });
+    }
+
+    drawImage(ctx) {
+        if (!this.calculatedImage) return;
+        const img = this.calculatedImage;
+        const topY = img.y - (img.isInverted ? -img.height : img.height);
+
+        ctx.save();
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = PALETTE.image;
+        ctx.strokeStyle = PALETTE.image;
+        ctx.lineWidth = 2;
+        if (!img.isReal) ctx.setLineDash([4, 4]);
+
+        ctx.beginPath(); ctx.moveTo(img.x, img.y); ctx.lineTo(img.x, topY); ctx.stroke();
+        labelChip(ctx, img.isReal ? 'real image [T]' : 'virtual image [T]', img.x, img.y - img.height - 15, PALETTE.image);
+        ctx.restore();
+    }
+
+    drawObjectArrow(ctx) {
+        const dir = this.arrow.isInverted ? -1 : 1;
+        const topY = this.arrow.y - (this.arrow.height * dir);
+
+        ctx.save();
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = PALETTE.object;
+        ctx.strokeStyle = PALETTE.object;
+        ctx.fillStyle = PALETTE.object;
+        ctx.lineWidth = 3;
+
+        ctx.beginPath(); ctx.moveTo(this.arrow.x, this.arrow.y); ctx.lineTo(this.arrow.x, topY); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(this.arrow.x - 5, topY + (8 * dir));
+        ctx.lineTo(this.arrow.x, topY);
+        ctx.lineTo(this.arrow.x + 5, topY + (8 * dir));
+        ctx.fill();
+
+        labelChip(ctx, 'You', this.arrow.x, this.arrow.y + 16, PALETTE.object);
+        ctx.restore();
+    }
+
+    drawWinBanner(ctx) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,0.85)';
+        ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+        ctx.font = 'bold 36px monospace';
+        ctx.fillStyle = '#00ff66';
+        ctx.textAlign = 'center';
+        ctx.fillText('ESCAPE SUCCESSFUL!', this.canvasWidth / 2, this.canvasHeight / 2 - 10);
+
+        ctx.font = '16px monospace';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('Press [R] to replay level', this.canvasWidth / 2, this.canvasHeight / 2 + 30);
+        ctx.restore();
+    }
+}

@@ -63,7 +63,7 @@
             font-size: 1.5rem;
             font-weight: normal;
             margin: 0 0 40px;
-            color: #ffffff;
+            color: #ff00ff;
         }
 
         .link {
@@ -107,54 +107,66 @@
     <a class="back" href="../index.html">← back</a>
 
     <main class="physics">
-
         <section class="window">
-
             <h1 class="window-title">other</h1>
-
-            <a class="link"
-               href="https://phet.colorado.edu/"
-               target="_blank"
-               rel="noopener noreferrer">
-                PhET Interactive Simulations
-            </a>
-
-            <a class="link"
-               href="https://www.feynmanlectures.caltech.edu/"
-               target="_blank"
-               rel="noopener noreferrer">
-                The Feynman Lectures
-            </a>
-
-            <a class="link"
-               href="https://ocw.mit.edu/"
-               target="_blank"
-               rel="noopener noreferrer">
-                MIT OpenCourseWare
-            </a>
-
+            <div id="other-links"></div>
         </section>
 
         <section class="window">
-
             <h1 class="window-title">mine</h1>
-
-            <a class="link" href="#">
-                My Physics Notes
-            </a>
-
-            <a class="link" href="#">
-                My Experiments
-            </a>
-
-            <a class="link" href="#">
-                My Physics Projects
-            </a>
-
+            <div id="mine-links"></div>
         </section>
-
     </main>
 
+    <script>
+        function populateUI(data) {
+            const otherContainer = document.getElementById('other-links');
+            const mineContainer = document.getElementById('mine-links');
+
+            otherContainer.innerHTML = '';
+            mineContainer.innerHTML = '';
+
+            if (data.other) {
+                data.other.forEach(item => {
+                    const a = document.createElement('a');
+                    a.className = 'link';
+                    a.href = item.url;
+                    a.textContent = item.title;
+                    if (item.url.startsWith('http')) {
+                        a.target = '_blank';
+                        a.rel = 'noopener noreferrer';
+                    }
+                    otherContainer.appendChild(a);
+                });
+            }
+
+            if (data.mine) {
+                data.mine.forEach(item => {
+                    const a = document.createElement('a');
+                    a.className = 'link';
+                    a.href = item.url;
+                    a.textContent = item.title;
+                    if (item.url.startsWith('http')) {
+                        a.target = '_blank';
+                        a.rel = 'noopener noreferrer';
+                    }
+                    mineContainer.appendChild(a);
+                });
+            }
+        }
+
+        async function renderLinks() {
+            try {
+                const response = await fetch('./links.json?v=' + Date.now());
+                if (!response.ok) throw new Error("HTTP error " + response.status);
+                const data = await response.json();
+                populateUI(data);
+            } catch (err) {
+                console.error("Could not load links.json:", err);
+            }
+        }
+
+        renderLinks();
+    </script>
 </body>
 </html>
-

@@ -1,0 +1,12 @@
+{
+  "other": [
+    { "title": "PhET Interactive Simulations", "url": "https://phet.colorado.edu/" },
+    { "title": "The Feynman Lectures", "url": "https://www.feynmanlectures.caltech.edu/" },
+    { "title": "MIT OpenCourseWare", "url": "https://ocw.mit.edu/" }
+  ],
+  "mine": [
+    { "title": "My Physics Notes", "url": "notes.html" },
+    { "title": "My Experiments", "url": "experiments.html" },
+    { "title": "My Physics Projects", "url": "projects.html" }
+  ]
+}
