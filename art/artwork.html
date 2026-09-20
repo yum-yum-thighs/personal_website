@@ -7,7 +7,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>my art</title>
+    <title>art</title>
 
     <style>
 
@@ -45,26 +45,53 @@
             color: #ff00ff;
         }
 
-        .page {
+        .art {
             width: 90%;
-            margin: 100px auto 60px;
+            margin: 70px auto 60px;
+            display: flex;
+            gap: 2px;
         }
 
-        .title {
+        .window {
+            flex: 1;
+            min-width: 0;
+            padding: 0 35px 40px;
+        }
+
+        .window:first-child {
+            border-right: 1px solid #333333;
+        }
+
+        .window-title {
             text-align: center;
             font-size: 1.5rem;
             font-weight: normal;
-            margin-bottom: 60px;
+            margin: 0 0 40px;
         }
+
+        .link {
+            display: block;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .link:hover {
+            color: #00ffff;
+        }
+
+        /* GALLERY */
 
         .gallery {
             column-count: 2;
-            column-gap: 25px;
+            column-gap: 20px;
         }
 
         .item {
             break-inside: avoid;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .item img,
@@ -75,12 +102,72 @@
             background: #111111;
         }
 
+        .item img {
+            cursor: zoom-in;
+        }
+
         .item img:hover,
         .item video:hover {
             outline: 1px solid #00ffff;
         }
 
+
+        /* FULLSCREEN IMAGE */
+
+        .image-viewer {
+            display: none;
+
+            position: fixed;
+
+            top: 0;
+            left: 0;
+
+            width: 100vw;
+            height: 100vh;
+
+            background: rgba(0, 0, 0, 0.95);
+
+            z-index: 1000;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 30px;
+
+            cursor: zoom-out;
+        }
+
+        .image-viewer.active {
+            display: flex;
+        }
+
+        .image-viewer img {
+
+            max-width: 95vw;
+            max-height: 95vh;
+
+            width: auto;
+            height: auto;
+
+            object-fit: contain;
+
+            cursor: default;
+        }
+
+
+        /* MOBILE */
+
         @media (max-width: 700px) {
+
+            .art {
+                display: block;
+            }
+
+            .window:first-child {
+                border-right: none;
+                border-bottom: 1px solid #333333;
+                margin-bottom: 50px;
+            }
 
             .gallery {
                 column-count: 1;
@@ -92,131 +179,164 @@
 
 </head>
 
+
 <body>
 
-    <a class="back" href="index.html">
+
+    <a class="back" href="../index.html">
         ← back
     </a>
 
-    <main class="page">
 
-        <h1 class="title">
-            my art
-        </h1>
+    <main class="art">
 
-        <div class="gallery" id="gallery"></div>
+
+        <!-- MY ART -->
+
+        <section class="window">
+
+            <h1 class="window-title">
+                myart
+            </h1>
+
+            <div class="gallery" id="gallery"></div>
+
+        </section>
+
+
+        <!-- PROJECTS -->
+
+        <section class="window">
+
+            <h1 class="window-title">
+                projects i worked on
+            </h1>
+
+            <div id="projects"></div>
+
+        </section>
+
 
     </main>
 
 
-    <!-- GALLERY_SCRIPT_START -->
+    <!-- IMAGE VIEWER -->
 
-<script>
+    <div class="image-viewer" id="imageViewer">
 
-const files = [
-    {
-        "name": "Box.png",
-        "type": "image"
-    },
-    {
-        "name": "Box2.png",
-        "type": "image"
-    },
-    {
-        "name": "Crystal.png",
-        "type": "image"
-    },
-    {
-        "name": "Crystal2.png",
-        "type": "image"
-    },
-    {
-        "name": "Floral.png",
-        "type": "image"
-    },
-    {
-        "name": "Fold.png",
-        "type": "image"
-    },
-    {
-        "name": "Hall.png",
-        "type": "image"
-    },
-    {
-        "name": "Horn.png",
-        "type": "image"
-    },
-    {
-        "name": "House.png",
-        "type": "image"
-    },
-    {
-        "name": "Lamp.png",
-        "type": "image"
-    },
-    {
-        "name": "Metalheart_1.png",
-        "type": "image"
-    },
-    {
-        "name": "Planet.png",
-        "type": "image"
-    },
-    {
-        "name": "Tree.mp4",
-        "type": "video"
-    },
-    {
-        "name": "Tree.png",
-        "type": "image"
-    }
-];
+        <img id="viewerImage" src="" alt="">
 
-const gallery = document.getElementById("gallery");
-
-files.forEach(file => {
-
-    const item = document.createElement("div");
-
-    item.className = "item";
+    </div>
 
 
-    if (file.type === "image") {
+    <!-- GALLERY & PROJECTS RENDER SCRIPT -->
 
-        const image = document.createElement("img");
+    <script>
 
-        image.src = "myart/" + file.name;
+    // 1. GALLERY RENDER
+    const files = [
+        { "name": "Box.png", "type": "image" },
+        { "name": "Box2.png", "type": "image" },
+        { "name": "Crystal.png", "type": "image" },
+        { "name": "Crystal2.png", "type": "image" },
+        { "name": "Floral.png", "type": "image" },
+        { "name": "Fold.png", "type": "image" },
+        { "name": "Hall.png", "type": "image" },
+        { "name": "Horn.png", "type": "image" },
+        { "name": "House.png", "type": "image" },
+        { "name": "Lamp.png", "type": "image" },
+        { "name": "Metalheart_1.png", "type": "image" },
+        { "name": "Planet.png", "type": "image" },
+        { "name": "Tree.mp4", "type": "video" },
+        { "name": "Tree.png", "type": "image" }
+    ];
 
-        image.alt = file.name;
+    const gallery = document.getElementById("gallery");
 
-        item.appendChild(image);
+    files.forEach(file => {
+        const item = document.createElement("div");
+        item.className = "item";
 
-    }
+        if (file.type === "image") {
+            const image = document.createElement("img");
+            image.src = "myart/" + file.name;
+            image.alt = file.name;
+            item.appendChild(image);
+        }
+
+        if (file.type === "video") {
+            const video = document.createElement("video");
+            video.src = "myart/" + file.name;
+            video.controls = true;
+            video.preload = "metadata";
+            item.appendChild(video);
+        }
+
+        gallery.appendChild(item);
+    });
+
+    // 2. FETCH PROJECTS FROM JSON
+    const projectsContainer = document.getElementById("projects");
+
+    fetch('projects.json')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(projects => {
+            projects.forEach(project => {
+                const a = document.createElement("a");
+                a.className = "link";
+                a.href = project.url;
+                a.textContent = project.title;
+
+                if (project.url.startsWith("http")) {
+                    a.target = "_blank";
+                    a.rel = "noopener noreferrer";
+                }
+
+                projectsContainer.appendChild(a);
+            });
+        })
+        .catch(error => {
+            console.error("Error loading projects.json:", error);
+        });
+
+    </script>
 
 
-    if (file.type === "video") {
+    <!-- FULLSCREEN IMAGE VIEWER SCRIPT -->
 
-        const video = document.createElement("video");
+    <script>
 
-        video.src = "myart/" + file.name;
+        const imageViewer = document.getElementById("imageViewer");
+        const viewerImage = document.getElementById("viewerImage");
 
-        video.controls = true;
+        document.addEventListener("dblclick", function(event) {
+            if (event.target.tagName === "IMG" && event.target.closest(".gallery")) {
+                viewerImage.src = event.target.src;
+                viewerImage.alt = event.target.alt;
+                imageViewer.classList.add("active");
+            }
+        });
 
-        video.preload = "metadata";
+        imageViewer.addEventListener("click", function(event) {
+            if (event.target === imageViewer) {
+                imageViewer.classList.remove("active");
+                viewerImage.src = "";
+            }
+        });
 
-        item.appendChild(video);
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "Escape") {
+                imageViewer.classList.remove("active");
+                viewerImage.src = "";
+            }
+        });
 
-    }
-
-
-    gallery.appendChild(item);
-
-});
-
-</script>
-
-<!-- GALLERY_SCRIPT_END -->
-
+    </script>
 
 </body>
 

@@ -1,6 +1,12 @@
-import { CONFIG } from './config.js';
+import { CONFIG, validateAllLinks } from './config.js';
 
 export function initPhysics() {
+    // Validate links on startup
+    const validation = validateAllLinks();
+    if (!validation.valid) {
+        console.error('Link configuration errors:', validation.errors);
+    }
+
     const { Engine, Render, Runner, Bodies, Composite, Mouse, MouseConstraint, Events, Query, Constraint } = Matter;
 
     const engine = Engine.create();
@@ -30,11 +36,13 @@ export function initPhysics() {
 
     Composite.add(world, [ground, ceiling, leftWall, rightWall]);
 
-    // 1. Create Free-Floating Boxes
+    // 1. Create Free-Floating Navigation Boxes
+    // These boxes are created from the CONFIG.links array
+    // Each box becomes clickable and navigates to its configured URL
     const scale = window.innerWidth < 800 ? window.innerWidth / 1000 : 1;
     const boxSize = window.innerWidth < 800 ? CONFIG.boxSize * 0.7 : CONFIG.boxSize;
 
-    const boxBodies = CONFIG.boxesData.map(data => {
+    const boxBodies = CONFIG.links.map(data => {
         const body = Bodies.rectangle(window.innerWidth / 2 + (data.xOffset * scale), data.y, boxSize, boxSize, {
             restitution: 0.8,
             frictionAir: 0.02,
@@ -44,6 +52,7 @@ export function initPhysics() {
                 lineWidth: 2
             }
         });
+        // Store link data on the body for click handling
         body.customLabel = data.label;
         body.targetUrl = data.url;
         return body;
@@ -55,7 +64,8 @@ export function initPhysics() {
     const uiLayer = document.getElementById('ui-layer');
     const bannerBottom = uiLayer ? uiLayer.getBoundingClientRect().bottom : 80; 
 
-    // 3. Create the bigger 7-Item Newton's Cradle
+    // 3. Create Newton's Cradle (decorative physics simulation)
+    // These balls are purely decorative and don't have URLs
     const centerX = window.innerWidth / 2;
     const ballSize = CONFIG.cradle.ballSize;
     const spacing = ballSize + 2; 
@@ -82,7 +92,7 @@ export function initPhysics() {
             }
         });
         body.customLabel = item.label;
-        body.targetUrl = item.url;
+        body.targetUrl = item.url || null; // Cradle items may not have URLs
 
         const rope = Constraint.create({
             pointA: pivot,
@@ -131,6 +141,8 @@ export function initPhysics() {
     Composite.add(world, mouseConstraint);
     render.mouse = mouse;
 
+    // Double-click handler for navigation
+    // When a user double-clicks on a box with a URL, navigate to that URL
     render.canvas.addEventListener('dblclick', (event) => {
         const rect = render.canvas.getBoundingClientRect();
         const clickX = event.clientX - rect.left;
