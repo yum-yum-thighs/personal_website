@@ -113,18 +113,18 @@
         </section>
 
         <section class="window">
-            <h1 class="window-title">mine</h1>
-            <div id="mine-links"></div>
+            <h1 class="window-title">my</h1>
+            <div id="my-links"></div>
         </section>
     </main>
 
     <script>
         function populateUI(data) {
             const otherContainer = document.getElementById('other-links');
-            const mineContainer = document.getElementById('mine-links');
+            const myContainer = document.getElementById('my-links');
 
             otherContainer.innerHTML = '';
-            mineContainer.innerHTML = '';
+            myContainer.innerHTML = '';
 
             if (data.other) {
                 data.other.forEach(item => {
@@ -140,8 +140,8 @@
                 });
             }
 
-            if (data.mine) {
-                data.mine.forEach(item => {
+            if (data.my) {
+                data.my.forEach(item => {
                     const a = document.createElement('a');
                     a.className = 'link';
                     a.href = item.url;
@@ -150,7 +150,7 @@
                         a.target = '_blank';
                         a.rel = 'noopener noreferrer';
                     }
-                    mineContainer.appendChild(a);
+                    myContainer.appendChild(a);
                 });
             }
         }

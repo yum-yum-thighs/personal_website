@@ -52,6 +52,8 @@ files.forEach(file => {{
 
         image.alt = file.name;
 
+        image.loading = "lazy";
+
         item.appendChild(image);
 
     }}
