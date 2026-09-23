@@ -1,73 +1,162 @@
-# Adding Links to Your Portfolio
+# Portfolio Navigation Guide
 
-This portfolio uses a physics-based navigation system where floating boxes act as clickable links. Adding new links is simple and clean.
+This portfolio uses a physics-based navigation system with floating boxes that act as clickable links. This guide explains how to manage navigation links across your portfolio.
 
-## Quick Start
+## 🎯 Main Navigation (Physics Boxes)
 
-1. Open `js/config.js`
-2. Find the `links` array in the CONFIG object
-3. Add your new link following the format below
+### Adding Main Navigation Links
 
-## Link Format
+Edit `js/config.js` to add links to the main page's floating navigation boxes:
 
 ```javascript
+links: [
+    { label: 'Diary', url: 'diary/index.html', xOffset: -375, y: 350 },
+    { label: 'Physics', url: 'physics/index.html', xOffset: -125, y: 400 },
+    { label: 'Art', url: 'art/index.html', xOffset: 125, y: 400 },
+    { label: 'Git', url: 'https://github.com/yum-yum-thighs', xOffset: 375, y: 350 }
+]
+```
+
+### Link Parameters
+
+- **label**: Text displayed on the navigation box
+- **url**: Link destination (relative for local pages, absolute for external sites)
+- **xOffset**: Horizontal position from center (negative = left, positive = right)
+- **y**: Vertical position from top of screen
+
+### Positioning Guide
+
+- **xOffset range**: -500 to 500 (recommended)
+- **y range**: 300 to 500 (recommended)
+- **0 xOffset**: Centers the box horizontally
+- **Negative xOffset**: Moves box to the left
+- **Positive xOffset**: Moves box to the right
+
+## 🎨 Art Projects Links
+
+### Adding Art Projects
+
+Edit `art/projects.json` to add project links in the art gallery:
+
+```json
+[
+  {
+    "title": "How to make videos like GawxArt",
+    "url": "https://youtu.be/gkteQH2DRK0?si=CorUCwCCn5hJjeoW"
+  },
+  {
+    "title": "Your New Project",
+    "url": "https://your-project-url.com"
+  }
+]
+```
+
+## ⚛️ Physics Resources Links
+
+### Adding Physics Resources
+
+Edit `physics/links.json` to add physics-related resources:
+
+```json
 {
-    label: 'Display Name',      // Text shown on the box
-    url: 'your-url-here',       // Relative or absolute URL
-    xOffset: -375,              // Horizontal position (negative = left, positive = right)
-    y: 350                      // Vertical position from top
+  "other": [
+    { 
+      "title": "Ray Optics Simulation", 
+      "url": "https://phydemo.app/ray-optics/simulator/" 
+    }
+  ],
+  "mine": [
+    { 
+      "title": "Rayway", 
+      "url": "rayway/index.html" 
+    }
+  ]
 }
 ```
 
-## Examples
+**Categories:**
+- **other**: External physics resources and tools
+- **mine**: Your personal physics projects
 
-### Adding a local page:
+## 🔧 Configuration Helpers
+
+The `js/config.js` file includes helper functions for link management:
+
+- **`validateLink(link)`**: Validates a single link object
+- **`validateAllLinks()`**: Validates all links in configuration
+- **`addLink(newLink)`**: Programmatically adds a new link
+
+## 🎮 Newton's Cradle
+
+The Newton's cradle at the top of the main page is decorative (spells "THESIN") and doesn't contain navigation links. To modify the text, edit the `cradle.items` array in `js/config.js`:
+
 ```javascript
-{ label: 'projects', url: 'projects/index.html', xOffset: -500, y: 380 }
+cradle: {
+    length: 180,
+    ballSize: 45,
+    items: [
+        { label: 'T' },
+        { label: 'A' },
+        { label: 'H' },
+        { label: 'E' },
+        { label: 'S' },
+        { label: 'I' },
+        { label: 'N' }
+    ]
+}
 ```
 
-### Adding an external website:
+## 📝 Current Navigation Structure
+
+### Main Page Links
+- **Diary** → diary/index.html
+- **Physics** → physics/index.html  
+- **Art** → art/index.html
+- **Git** → https://github.com/yum-yum-thighs
+
+### Art Projects
+- **How to make videos like GawxArt** → YouTube tutorial
+
+### Physics Resources
+- **Other**: External simulations and resources
+- **Mine**: Rayway (in progress)
+
+## 🚀 Quick Examples
+
+### Adding a Local Section
 ```javascript
-{ label: 'linkedin', url: 'https://linkedin.com/in/yourprofile', xOffset: 500, y: 380 }
+{ label: 'Projects', url: 'projects/index.html', xOffset: 0, y: 450 }
 ```
 
-### Adding a GitHub repository:
+### Adding an External Link
 ```javascript
-{ label: 'github', url: 'https://github.com/yourusername', xOffset: 0, y: 450 }
+{ label: 'LinkedIn', url: 'https://linkedin.com/in/yourprofile', xOffset: 500, y: 380 }
 ```
 
-## Positioning Tips
+### Adding a GitHub Repository
+```javascript
+{ label: 'GitHub', url: 'https://github.com/yourusername/repo', xOffset: -500, y: 380 }
+```
 
-- **xOffset**: Horizontal offset from the center of the screen
-  - Negative values move the box to the left
-  - Positive values move the box to the right
-  - 0 centers the box horizontally
-  
-- **y**: Vertical position from the top of the screen
-  - Lower values = higher on screen
-  - Higher values = lower on screen
-  - Typical range: 300-500
+## ⚠️ Important Notes
 
-## Current Links
+- **External links** automatically open in new tabs with security attributes
+- **Validation** occurs on startup - check browser console for errors
+- **Responsive design** adjusts box positions on smaller screens
+- **Double-click** navigation boxes to access links
 
-The portfolio currently has these links configured:
-- **diary** → diary/index.html
-- **physics** → physics/index.html  
-- **art** → art/index.html
-- **git** → https://github.com/yum-yum-thighs
+## 🛠️ Troubleshooting
 
-## Validation
+**Links not working?**
+- Check browser console for validation errors
+- Verify URL format (relative vs absolute)
+- Ensure file paths are correct
 
-The configuration includes automatic validation. If you add a link incorrectly, check the browser console for error messages.
+**Boxes not visible?**
+- Check xOffset/y positioning
+- Verify box size in config
+- Check screen size responsiveness
 
-## Helper Functions
+---
 
-The `config.js` file includes helper functions for programmatic link management:
-
-- `validateLink(link)` - Check if a single link is valid
-- `validateAllLinks()` - Validate all links in the configuration
-- `addLink(newLink)` - Programmatically add a new link
-
-## Newton's Cradle
-
-The Newton's cradle at the top is decorative (spells "THESIN") and doesn't contain links. To modify it, edit the `cradle.items` array in `config.js`.
+For more detailed information, see the main README.md file.

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>physics</title>
+    <title>Physics</title>
 
     <style>
         @font-face {
@@ -108,23 +108,23 @@
 
     <main class="physics">
         <section class="window">
-            <h1 class="window-title">other</h1>
+            <h1 class="window-title">Other</h1>
             <div id="other-links"></div>
         </section>
 
         <section class="window">
-            <h1 class="window-title">my</h1>
-            <div id="my-links"></div>
+            <h1 class="window-title">Mine</h1>
+            <div id="mine-links"></div>
         </section>
     </main>
 
     <script>
         function populateUI(data) {
             const otherContainer = document.getElementById('other-links');
-            const myContainer = document.getElementById('my-links');
+            const mineContainer = document.getElementById('mine-links');
 
             otherContainer.innerHTML = '';
-            myContainer.innerHTML = '';
+            mineContainer.innerHTML = '';
 
             if (data.other) {
                 data.other.forEach(item => {
@@ -140,8 +140,8 @@
                 });
             }
 
-            if (data.my) {
-                data.my.forEach(item => {
+            if (data.mine) {
+                data.mine.forEach(item => {
                     const a = document.createElement('a');
                     a.className = 'link';
                     a.href = item.url;
@@ -150,7 +150,7 @@
                         a.target = '_blank';
                         a.rel = 'noopener noreferrer';
                     }
-                    myContainer.appendChild(a);
+                    mineContainer.appendChild(a);
                 });
             }
         }

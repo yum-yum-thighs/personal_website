@@ -19,13 +19,17 @@ for file in sorted(MYART.iterdir()):
     if ext in IMAGE_TYPES:
         files.append({
             "name": file.name,
-            "type": "image"
+            "type": "image",
+            "web": f"web/{file.stem}.webp",
+            "highRes": f"myart/{file.name}"
         })
 
     elif ext in VIDEO_TYPES:
         files.append({
             "name": file.name,
-            "type": "video"
+            "type": "video",
+            "web": f"myart/{file.name}",
+            "highRes": f"myart/{file.name}"
         })
 
 data = json.dumps(files, indent=4)
@@ -48,13 +52,24 @@ files.forEach(file => {{
 
         const image = document.createElement("img");
 
-        image.src = "myart/" + file.name;
+        image.src = file.web || "myart/" + file.name;
 
         image.alt = file.name;
 
         image.loading = "lazy";
 
         item.appendChild(image);
+
+        // Add download button for high-res version
+        if (file.highRes) {{
+            const downloadBtn = document.createElement("a");
+            downloadBtn.href = file.highRes;
+            downloadBtn.download = file.name;
+            downloadBtn.textContent = "↓ Download High-Res";
+            downloadBtn.className = "download-btn";
+            downloadBtn.style.cssText = "display: block; margin-top: 8px; font-size: 0.8rem; color: #00ffff; text-decoration: none;";
+            item.appendChild(downloadBtn);
+        }}
 
     }}
 
@@ -63,7 +78,7 @@ files.forEach(file => {{
 
         const video = document.createElement("video");
 
-        video.src = "myart/" + file.name;
+        video.src = file.web || "myart/" + file.name;
 
         video.controls = true;
 

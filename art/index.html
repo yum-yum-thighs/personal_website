@@ -7,7 +7,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>art</title>
+    <title>Art</title>
 
     <style>
 
@@ -197,7 +197,7 @@
         <section class="window">
 
             <h1 class="window-title">
-                myart
+                My Art
             </h1>
 
             <div class="gallery" id="gallery"></div>
@@ -210,7 +210,7 @@
         <section class="window">
 
             <h1 class="window-title">
-                projects I worked on
+                Projects I Worked On
             </h1>
 
 
@@ -257,59 +257,87 @@
 const files = [
     {
         "name": "Box.png",
-        "type": "image"
+        "type": "image",
+        "web": "web/Box.webp",
+        "highRes": "myart/Box.png"
     },
     {
         "name": "Box2.png",
-        "type": "image"
+        "type": "image",
+        "web": "web/Box2.webp",
+        "highRes": "myart/Box2.png"
     },
     {
         "name": "Crystal.png",
-        "type": "image"
+        "type": "image",
+        "web": "web/Crystal.webp",
+        "highRes": "myart/Crystal.png"
     },
     {
         "name": "Crystal2.png",
-        "type": "image"
+        "type": "image",
+        "web": "web/Crystal2.webp",
+        "highRes": "myart/Crystal2.png"
     },
     {
         "name": "Floral.png",
-        "type": "image"
+        "type": "image",
+        "web": "web/Floral.webp",
+        "highRes": "myart/Floral.png"
     },
     {
         "name": "Fold.png",
-        "type": "image"
+        "type": "image",
+        "web": "web/Fold.webp",
+        "highRes": "myart/Fold.png"
     },
     {
         "name": "Hall.png",
-        "type": "image"
+        "type": "image",
+        "web": "web/Hall.webp",
+        "highRes": "myart/Hall.png"
     },
     {
         "name": "Horn.png",
-        "type": "image"
+        "type": "image",
+        "web": "web/Horn.webp",
+        "highRes": "myart/Horn.png"
     },
     {
         "name": "House.png",
-        "type": "image"
+        "type": "image",
+        "web": "web/House.webp",
+        "highRes": "myart/House.png"
     },
     {
         "name": "Lamp.png",
-        "type": "image"
+        "type": "image",
+        "web": "web/Lamp.webp",
+        "highRes": "myart/Lamp.png"
     },
     {
         "name": "Metalheart_1.png",
-        "type": "image"
+        "type": "image",
+        "web": "web/Metalheart_1.webp",
+        "highRes": "myart/Metalheart_1.png"
     },
     {
         "name": "Planet.png",
-        "type": "image"
+        "type": "image",
+        "web": "web/Planet.webp",
+        "highRes": "myart/Planet.png"
     },
     {
         "name": "Tree.mp4",
-        "type": "video"
+        "type": "video",
+        "web": "myart/Tree.mp4",
+        "highRes": "myart/Tree.mp4"
     },
     {
         "name": "Tree.png",
-        "type": "image"
+        "type": "image",
+        "web": "web/Tree.webp",
+        "highRes": "myart/Tree.png"
     }
 ];
 
@@ -326,13 +354,24 @@ files.forEach(file => {
 
         const image = document.createElement("img");
 
-        image.src = "myart/" + file.name;
+        image.src = file.web || "myart/" + file.name;
 
         image.alt = file.name;
 
         image.loading = "lazy";
 
         item.appendChild(image);
+
+        // Add download button for high-res version
+        if (file.highRes) {
+            const downloadBtn = document.createElement("a");
+            downloadBtn.href = file.highRes;
+            downloadBtn.download = file.name;
+            downloadBtn.textContent = "↓ Download High-Res";
+            downloadBtn.className = "download-btn";
+            downloadBtn.style.cssText = "display: block; margin-top: 8px; font-size: 0.8rem; color: #00ffff; text-decoration: none;";
+            item.appendChild(downloadBtn);
+        }
 
     }
 
@@ -341,7 +380,7 @@ files.forEach(file => {
 
         const video = document.createElement("video");
 
-        video.src = "myart/" + file.name;
+        video.src = file.web || "myart/" + file.name;
 
         video.controls = true;
 
