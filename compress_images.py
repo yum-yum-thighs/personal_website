@@ -17,7 +17,11 @@ QUALITY = 75  # WebP quality (0-100)
 def check_tool_available(tool):
     """Check if a compression tool is available"""
     try:
-        subprocess.run([tool, "--version"], capture_output=True, check=True)
+        if tool == "cwebp":
+            # cwebp doesn't have --version, test with -h
+            subprocess.run([tool, "-h"], capture_output=True, check=True)
+        else:
+            subprocess.run([tool, "--version"], capture_output=True, check=True)
         return True
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
@@ -67,10 +71,10 @@ def compress_images():
     
     print("Available compression tools:")
     for tool, available in tools.items():
-        print(f"  {tool}: {'✓' if available else '✗'}")
+        print(f"  {tool}: {'YES' if available else 'NO'}")
     
     if not any(tools.values()):
-        print("⚠ No compression tools found. Files will be copied without compression.")
+        print("[WARN] No compression tools found. Files will be copied without compression.")
         print("Install cwebp or ImageMagick for better compression.")
     
     # Process images
@@ -98,11 +102,11 @@ def compress_images():
         
         if compressed:
             compressed_count += 1
-            print(f"  ✓ Compressed")
+            print(f"  [OK] Compressed")
         else:
             manual_copy(file, output_file)
             copied_count += 1
-            print(f"  ⚠ Copied (no compression)")
+            print(f"  [WARN] Copied (no compression)")
     
     print(f"\n{'='*50}")
     print(f"Compression complete!")

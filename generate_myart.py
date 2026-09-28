@@ -65,9 +65,8 @@ files.forEach(file => {{
             const downloadBtn = document.createElement("a");
             downloadBtn.href = file.highRes;
             downloadBtn.download = file.name;
-            downloadBtn.textContent = "↓ Download High-Res";
+            downloadBtn.textContent = "Download High-Res";
             downloadBtn.className = "download-btn";
-            downloadBtn.style.cssText = "display: block; margin-top: 8px; font-size: 0.8rem; color: #00ffff; text-decoration: none;";
             item.appendChild(downloadBtn);
         }}
 

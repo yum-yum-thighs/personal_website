@@ -112,6 +112,37 @@
             outline: 1px solid #00ffff;
         }
 
+        /* DOWNLOAD BUTTON STYLING */
+        .download-btn {
+            display: block;
+            margin-top: 12px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            color: #00ffff;
+            text-decoration: none;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 4px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            color: #ffffff;
+            border-color: #ffffff;
+        }
+
+        /* IMAGE PLACEHOLDER */
+        .item img {
+            min-height: 200px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        }
+
+        .item img[src=""] {
+            display: none;
+        }
+
 
         /* FULLSCREEN IMAGE */
 
@@ -367,9 +398,8 @@ files.forEach(file => {
             const downloadBtn = document.createElement("a");
             downloadBtn.href = file.highRes;
             downloadBtn.download = file.name;
-            downloadBtn.textContent = "↓ Download High-Res";
+            downloadBtn.textContent = "Download High-Res";
             downloadBtn.className = "download-btn";
-            downloadBtn.style.cssText = "display: block; margin-top: 8px; font-size: 0.8rem; color: #00ffff; text-decoration: none;";
             item.appendChild(downloadBtn);
         }
 
