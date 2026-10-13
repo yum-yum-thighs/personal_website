@@ -1,143 +1,39 @@
-# Portfolio Content Management Workflow
+# Adding content to your website
 
-This guide covers the complete workflow for managing your portfolio content: diary posts, artwork uploads, and website linking.
+You only need two places for art updates: `art/myart/` for your files and
+`art/projects.json` for project links. You do not need to edit HTML or JavaScript.
 
-## 📝 Adding Diary Posts
+## Add artwork or a video
 
-### Step 1: Create New Diary Post
+1. Copy your finished file into `art/myart/`.
+2. From the website folder, run:
 
-**Option A: Using the Template (Recommended)**
-1. Copy `diary/1_diary_template.txt`
-2. Rename it to the next number (e.g., `3_diary_template.txt`)
-3. Open the file and replace the placeholders:
-   ```html
-   POST TITLE → Your post title
-   POST NUMBER → 3
-   DD.MM.YYYY → Today's date (e.g., 28.09.2026)
+   ```powershell
+   python scripts/update_art.py
    ```
-4. Write your content in the content section
-5. Save as `3.html` (remove `_template.txt` extension)
 
-**Option B: Manual Creation**
-1. Copy an existing diary post (e.g., `1.html`)
-2. Update the content
-3. Save as new file with next number
+3. Preview Art Ã¢â€ â€™ My Art and check the artwork.
 
-### Step 2: Update Diary Index
+Images: PNG, JPG, JPEG, GIF, WebP, BMP. Videos: MP4, WebM, OGG, MOV.
+MP4 or WebM are the most practical video exports; MOV support depends on the codec.
+The existing `loop.mkv` is kept but skipped; export an MP4 to display it.
+`Film.mp4` lives in `art/myart/` and appears in My Art without a filename caption.
+Its H.264/AAC playback copy is `art/web/film.mp4`; the browser-compatible copy is downloadable. The full-quality master stays local
+and is excluded from Git because it exceeds GitHub's per-file limit.
+To recreate that playback copy, run `python scripts/prepare_film.py` (requires PyAV),
+then `python scripts/update_art.py`.
 
-Edit `diary/index.html` to add your new post:
+The command scans files alphabetically and writes `art/gallery.json`.
+Deleting a file and rerunning it removes the artwork from the gallery.
+Originals remain available through Download High-Res. Existing previews in
+`art/web/` are used when available; otherwise the original image is displayed.
+Optional: `python -m pip install Pillow` enables automatic resized WebP previews.
+Animated GIFs keep their original animation. Do not edit the generated gallery
+JSON by hand: the next refresh replaces it.
 
-```html
-<div class="post">
-    <div class="number">3</div>
-    <div class="date">28.09.2026</div>
-    <a class="title" href="3.html">Your Post Title</a>
-</div>
-```
+## Link a project
 
-### Step 3: Style Your Content
-
-**Available formatting in diary posts:**
-- **Paragraphs:** `<p>Your text here</p>`
-- **Headings:** `<h2>Section Title</h2>`
-- **Links:** `<a href="url">Link text</a>`
-- **Images:** `<img src="../path/to/image.jpg" alt="description">`
-
-### Step 4: Commit and Deploy
-
-```bash
-git add diary/
-git commit -m "Add new diary post: [title]"
-git push
-```
-
-## 🎨 Uploading Artwork
-
-### Step 1: Prepare Your Artwork
-
-**File requirements:**
-- **Format:** PNG, JPG, JPEG, BMP, GIF
-- **Size:** Any size (will be compressed automatically)
-- **Naming:** Descriptive names (e.g., `Sunset.png`, `Portrait.jpg`)
-
-### Step 2: Add to Art Folder
-
-1. Place your artwork in `art/myart/` folder
-2. Make sure file names don't have spaces or special characters
-
-### Step 3: Compress for Web
-
-**Run the compression script:**
-```bash
-python compress_images.py
-```
-
-**What this does:**
-- Converts images to WebP format (75% quality)
-- Creates compressed versions in `art/web/`
-- Keeps original high-res files in `art/myart/`
-- Typically reduces file size by 50-70%
-
-### Step 4: Update Gallery
-
-**Option A: Manual Update**
-Edit `art/index.html` and add your new image to the `files` array:
-
-```javascript
-{
-    "name": "YourImage.png",
-    "type": "image",
-    "web": "web/YourImage.webp",
-    "highRes": "myart/YourImage.png"
-}
-```
-
-**Option B: Automatic Update**
-```bash
-python generate_myart.py
-```
-
-This automatically scans `art/myart/` and updates the gallery.
-
-### Step 5: Test Locally
-
-1. Open `art/index.html` in your browser
-2. Verify your new image appears
-3. Test the download button works
-4. Check image quality and loading speed
-
-### Step 6: Deploy
-
-```bash
-git add art/
-git commit -m "Add new artwork: [image name]"
-git push
-```
-
-## 🔗 Linking Websites
-
-### Main Navigation Links
-
-**Edit `js/config.js` to add main navigation boxes:**
-
-```javascript
-links: [
-    { label: 'Diary', url: 'diary/index.html', xOffset: -375, y: 350 },
-    { label: 'Physics', url: 'physics/index.html', xOffset: -125, y: 400 },
-    { label: 'Art', url: 'art/index.html', xOffset: 125, y: 400 },
-    { label: 'Git', url: 'https://github.com/yum-yum-thighs', xOffset: 375, y: 350 },
-    // Add your new link here:
-    { label: 'Projects', url: 'projects/index.html', xOffset: 0, y: 450 }
-]
-```
-
-**Positioning guide:**
-- `xOffset`: -500 (far left) to 500 (far right), 0 (center)
-- `y`: 300 (top) to 500 (bottom)
-
-### Art Project Links
-
-**Edit `art/projects.json` to add project links:**
+Open `art/projects.json`. Each entry has a title and destination:
 
 ```json
 [
@@ -146,205 +42,72 @@ links: [
     "url": "https://youtu.be/gkteQH2DRK0?si=CorUCwCCn5hJjeoW"
   },
   {
-    "title": "Your New Project",
-    "url": "https://your-project-url.com"
+    "title": "My next project",
+    "url": "https://example.com/my-project"
   }
 ]
 ```
 
-### Physics Resource Links
+Replace the example with your actual project. Put a comma between entries,
+but no comma after the last one. Save and refresh: no generation command needed.
+Local URLs are relative to `art/index.html`, such as `projects/example/index.html`.
+External destinations open in a new tab. There is no upload service or account:
+adding files locally and publishing the repository is how content reaches the site.
 
-**Edit `physics/links.json` to add physics resources:**
+## Preview before publishing
 
-```json
-{
-  "other": [
-    { 
-      "title": "New Resource", 
-      "url": "https://resource-url.com" 
-    }
-  ],
-  "mine": [
-    { 
-      "title": "Your Physics Project", 
-      "url": "your-project/index.html" 
-    }
-  ]
-}
+Run from the website folder:
+
+```powershell
+python -m http.server 8000
 ```
 
-## 🚀 Complete Workflow Example
+Open `http://localhost:8000`, then visit Art. Stop the server with Ctrl+C.
+Use a local server because JSON fetching and JavaScript modules need HTTP.
+Check your new image/video, image preview (double-click or Enter), downloads,
+and project links. Also check a narrow browser window.
 
-### Adding a New Diary Post with Artwork
+## Publish your changes
 
-**Scenario:** You want to write about a new artwork you created.
+When you are happy with the preview:
 
-**Step 1: Add the artwork**
-```bash
-# Place artwork in art/myart/
-python compress_images.py
-python generate_myart.py
-```
-
-**Step 2: Create diary post**
-```bash
-# Copy template and create new post
-# Write about your artwork
-```
-
-**Step 3: Update diary index**
-```html
-<div class="post">
-    <div class="number">3</div>
-    <div class="date">28.09.2026</div>
-    <a class="title" href="3.html">New Artwork Created</a>
-</div>
-```
-
-**Step 4: Deploy everything**
-```bash
-git add diary/ art/
-git commit -m "Add diary post about new artwork"
+```powershell
+git status --short
+git add art/
+git commit -m "Add artwork and project links"
 git push
 ```
 
-## 🛠️ Tools and Scripts
+This publishes through whatever deployment is configured for the repository.
+For the first refactor commit, also include the changed scripts, styles, and docs
+shown by `git status`. Check your deployed website after the deployment completes.
 
-### compress_images.py
-**Purpose:** Compress images for web viewing
-**Usage:** `python compress_images.py`
-**Requirements:** cwebp (installed on your system)
+## Other content
 
-### generate_myart.py
-**Purpose:** Auto-generate art gallery from files
-**Usage:** `python generate_myart.py`
-**Requirements:** None
+- Diary: copy `diary/1_diary_template.txt`, save as the next numbered HTML file,
+  and add its date/title/link to `diary/index.html`.
+- Physics links: edit `physics/links.json`; `other` is resources and `mine` is
+  personal projects. An empty list is valid.
+- Homepage boxes: edit `js/config.js`.
+- Rayway stays isolated in its existing folder. Leave it alone and do not add a link.
 
-### Manual Gallery Updates
-**When to use:** When you want custom control over gallery
-**How:** Edit `art/index.html` files array directly
+## Folder map
 
-## 📋 Content Checklist
-
-### Before Publishing Diary Posts
-- [ ] Post title is descriptive
-- [ ] Date is correct (DD.MM.YYYY format)
-- [ ] Content is spell-checked
-- [ ] Links work correctly
-- [ ] Images (if any) are properly sized
-
-### Before Publishing Artwork
-- [ ] Image is in `art/myart/` folder
-- [ ] Image has descriptive name
-- [ ] Compression script has been run
-- [ ] Gallery has been updated
-- [ ] Download button works
-- [ ] Image loads correctly in browser
-
-### Before Adding Links
-- [ ] URL is correct and accessible
-- [ ] Link description is clear
-- [ ] External links open in new tab (automatic)
-- [ ] Positioning looks good on main page
-
-## 🎯 Best Practices
-
-### Diary Posts
-- **Consistent dating:** Use DD.MM.YYYY format
-- **Descriptive titles:** Make titles meaningful
-- **Regular posting:** Keep your diary active
-- **Content quality:** Proofread before publishing
-
-### Artwork
-- **High quality:** Start with best quality originals
-- **Good naming:** Use descriptive, searchable names
-- **Regular updates:** Add new art consistently
-- **Organization:** Keep similar art together
-
-### Linking
-- **Relevant links:** Only link to quality resources
-- **Good descriptions:** Clear link titles
-- **Check regularly:** Remove broken links
-- **Categorize properly:** Use correct sections
-
-## 🔍 Troubleshooting
-
-### Diary Issues
-**Post not appearing:**
-- Check file name matches index.html reference
-- Verify file is in diary/ folder
-- Check for HTML syntax errors
-
-**Styling broken:**
-- Ensure you copied the complete template
-- Check CSS is loading correctly
-- Verify font files are accessible
-
-### Art Gallery Issues
-**Images not loading:**
-- Run compression script again
-- Check file paths in files array
-- Verify images are in correct folders
-
-**Download button not working:**
-- Check highRes path is correct
-- Verify file exists in myart/ folder
-- Test link in browser directly
-
-### Link Issues
-**Link not working:**
-- Verify URL is correct
-- Check for typos in configuration files
-- Test link in browser directly
-
-**Position wrong:**
-- Adjust xOffset/y values
-- Test on different screen sizes
-- Check responsive behavior
-
-## 📊 Deployment Workflow
-
-### Standard Deployment
-```bash
-# 1. Make your changes
-# 2. Stage changes
-git add .
-
-# 3. Commit with descriptive message
-git commit -m "Add [content type]: [description]"
-
-# 4. Push to GitHub
-git push
-
-# 5. Wait 1-2 minutes for GitHub Pages deployment
-# 6. Check https://yum-yum-thighs.github.io/personal_website/
+```text
+index.html + style.css   Physics homepage and its visual style
+js/                     Homepage, art, and resource behavior
+art/index.html          Gallery page structure
+art/style.css           Original gallery styling
+art/myart/              Your original images and videos
+art/web/                WebP display previews
+art/gallery.json        Generated artwork list
+art/projects.json       Project links you edit
+physics/links.json      Physics links you edit
+physics/rayway/         Existing isolated project; untouched
+scripts/update_art.py   One command to refresh artwork
+diary/                 Diary posts and template
 ```
 
-### Quick Check Before Deploying
-- [ ] All changes are staged
-- [ ] Commit message is clear
-- [ ] No sensitive data included
-- [ ] Files are in correct locations
-- [ ] Tested locally (if possible)
-
-## 🎨 Advanced Customization
-
-### Custom Diary Styling
-Edit diary CSS in individual post files or create shared stylesheet.
-
-### Custom Gallery Layout
-Modify `art/index.html` CSS for different gallery layouts.
-
-### Custom Navigation Style
-Edit `js/physics.js` for different physics behaviors.
-
----
-
-## 📞 Need Help?
-
-- **Diary issues:** Check template and file naming
-- **Art issues:** Run compression script again
-- **Link issues:** Verify URLs and configuration
-- **Deployment issues:** Check GitHub Actions tab
-
-This workflow covers all essential content management tasks for your portfolio. Follow these steps for consistent, professional updates to your site.
+If content does not appear, run the refresh command, confirm the filename,
+check JSON commas, and reload the HTTP preview. A video that does not play
+usually needs a browser-compatible MP4 (H.264) or WebM export.

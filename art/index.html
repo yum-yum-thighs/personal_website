@@ -9,219 +9,17 @@
 
     <title>Art</title>
 
-    <style>
-
-        @font-face {
-            font-family: 'CMUNRM';
-            src: url('../fonts/cmunrm.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            background: #000000;
-            color: #ffffff;
-            font-family: 'CMUNRM', serif;
-        }
-
-        .back {
-            position: fixed;
-            top: 25px;
-            left: 30px;
-            color: #00ffff;
-            text-decoration: none;
-            font-size: 1.2rem;
-            z-index: 100;
-        }
-
-        .back:hover {
-            color: #ff00ff;
-        }
-
-        .art {
-            width: 90%;
-            margin: 70px auto 60px;
-            display: flex;
-            gap: 2px;
-        }
-
-        .window {
-            flex: 1;
-            min-width: 0;
-            padding: 0 35px 40px;
-        }
-
-        .window:first-child {
-            border-right: 1px solid #333333;
-        }
-
-        .window-title {
-            text-align: center;
-	  color: #ff00ff;
-            font-size: 1.5rem;
-            font-weight: normal;
-            margin: 0 0 40px;
-        }
-
-        .link {
-            display: block;
-            color: #ffffff;
-            text-decoration: none;
-            font-size: 1.25rem;
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-
-        .link:hover {
-            color: #00ffff;
-        }
-
-        /* GALLERY */
-
-        .gallery {
-            column-count: 2;
-            column-gap: 20px;
-        }
-
-        .item {
-            break-inside: avoid;
-            margin-bottom: 20px;
-        }
-
-        .item img,
-        .item video {
-            width: 100%;
-            height: auto;
-            display: block;
-            background: #111111;
-        }
-
-        .item img {
-            cursor: zoom-in;
-        }
-
-        .item img:hover,
-        .item video:hover {
-            outline: 1px solid #00ffff;
-        }
-
-        /* DOWNLOAD BUTTON STYLING */
-        .download-btn {
-            display: block;
-            margin-top: 12px;
-            padding: 8px 16px;
-            font-size: 0.85rem;
-            color: #00ffff;
-            text-decoration: none;
-            background: rgba(0, 255, 255, 0.1);
-            border: 1px solid #00ffff;
-            border-radius: 4px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .download-btn:hover {
-            background: rgba(0, 255, 255, 0.2);
-            color: #ffffff;
-            border-color: #ffffff;
-        }
-
-        /* IMAGE PLACEHOLDER */
-        .item img {
-            min-height: 200px;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-        }
-
-        .item img[src=""] {
-            display: none;
-        }
-
-
-        /* FULLSCREEN IMAGE */
-
-        .image-viewer {
-            display: none;
-
-            position: fixed;
-
-            top: 0;
-            left: 0;
-
-            width: 100vw;
-            height: 100vh;
-
-            background: rgba(0, 0, 0, 0.95);
-
-            z-index: 1000;
-
-            align-items: center;
-            justify-content: center;
-
-            padding: 30px;
-
-            cursor: zoom-out;
-        }
-
-        .image-viewer.active {
-            display: flex;
-        }
-
-        .image-viewer img {
-
-            max-width: 95vw;
-            max-height: 95vh;
-
-            width: auto;
-            height: auto;
-
-            object-fit: contain;
-
-            cursor: default;
-        }
-
-
-        /* MOBILE */
-
-        @media (max-width: 700px) {
-
-            .art {
-                display: block;
-            }
-
-            .window:first-child {
-                border-right: none;
-                border-bottom: 1px solid #333333;
-                margin-bottom: 50px;
-            }
-
-            .gallery {
-                column-count: 1;
-            }
-
-        }
-
-    </style>
+    <link rel="stylesheet" href="style.css">
 
 </head>
 
-
 <body>
-
 
     <a class="back" href="../index.html">
         ← back
     </a>
 
-
     <main class="art">
-
 
         <!-- MY ART -->
 
@@ -231,10 +29,10 @@
                 My Art
             </h1>
 
-            <div class="gallery" id="gallery"></div>
+            <div class="gallery" id="gallery" aria-live="polite"></div>
+            <noscript>Enable JavaScript to view the gallery.</noscript>
 
         </section>
-
 
         <!-- PROJECTS -->
 
@@ -244,233 +42,20 @@
                 Projects I Worked On
             </h1>
 
-
-            <a
-                class="link"
-                href="https://youtu.be/gkteQH2DRK0?si=CorUCwCCn5hJjeoW"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                How to make videos like GawxArt
-            </a>
-
-
-            <a class="link" href="#">
-                Project 2
-            </a>
-
-
-            <a class="link" href="#">
-                Project 3
-            </a>
+            <div id="project-links" aria-live="polite"></div>
 
         </section>
 
-
     </main>
-
 
     <!-- IMAGE VIEWER -->
 
-    <div class="image-viewer" id="imageViewer">
+    <div class="image-viewer" id="imageViewer" role="dialog" aria-modal="true" aria-label="Artwork preview" tabindex="-1">
 
-        <img id="viewerImage" src="" alt="">
+        <img id="viewerImage" alt="">
 
     </div>
 
-
-    <!-- GALLERY SCRIPT -->
-
-    <!-- GALLERY_SCRIPT_START -->
-
-<script>
-
-const files = [
-    {
-        "name": "Box.png",
-        "type": "image",
-        "web": "web/Box.webp",
-        "highRes": "myart/Box.png"
-    },
-    {
-        "name": "Box2.png",
-        "type": "image",
-        "web": "web/Box2.webp",
-        "highRes": "myart/Box2.png"
-    },
-    {
-        "name": "Floral.png",
-        "type": "image",
-        "web": "web/Floral.webp",
-        "highRes": "myart/Floral.png"
-    },
-    {
-        "name": "Fold.png",
-        "type": "image",
-        "web": "web/Fold.webp",
-        "highRes": "myart/Fold.png"
-    },
-    {
-        "name": "Hall.png",
-        "type": "image",
-        "web": "web/Hall.webp",
-        "highRes": "myart/Hall.png"
-    },
-    {
-        "name": "Horn.png",
-        "type": "image",
-        "web": "web/Horn.webp",
-        "highRes": "myart/Horn.png"
-    },
-    {
-        "name": "House.png",
-        "type": "image",
-        "web": "web/House.webp",
-        "highRes": "myart/House.png"
-    },
-    {
-        "name": "Lamp.png",
-        "type": "image",
-        "web": "web/Lamp.webp",
-        "highRes": "myart/Lamp.png"
-    },
-    {
-        "name": "Metalheart_1.png",
-        "type": "image",
-        "web": "web/Metalheart_1.webp",
-        "highRes": "myart/Metalheart_1.png"
-    },
-    {
-        "name": "Planet.png",
-        "type": "image",
-        "web": "web/Planet.webp",
-        "highRes": "myart/Planet.png"
-    },
-    {
-        "name": "Tree.mp4",
-        "type": "video",
-        "web": "myart/Tree.mp4",
-        "highRes": "myart/Tree.mp4"
-    },
-    {
-        "name": "Tree.png",
-        "type": "image",
-        "web": "web/Tree.webp",
-        "highRes": "myart/Tree.png"
-    }
-];
-
-const gallery = document.getElementById("gallery");
-
-files.forEach(file => {
-
-    const item = document.createElement("div");
-
-    item.className = "item";
-
-
-    if (file.type === "image") {
-
-        const image = document.createElement("img");
-
-        image.src = file.web || "myart/" + file.name;
-
-        image.alt = file.name;
-
-        image.loading = "lazy";
-
-        item.appendChild(image);
-
-        // Add download button for high-res version
-        if (file.highRes) {
-            const downloadBtn = document.createElement("a");
-            downloadBtn.href = file.highRes;
-            downloadBtn.download = file.name;
-            downloadBtn.textContent = "Download High-Res";
-            downloadBtn.className = "download-btn";
-            item.appendChild(downloadBtn);
-        }
-
-    }
-
-
-    if (file.type === "video") {
-
-        const video = document.createElement("video");
-
-        video.src = file.web || "myart/" + file.name;
-
-        video.controls = true;
-
-        video.preload = "metadata";
-
-        item.appendChild(video);
-
-    }
-
-
-    gallery.appendChild(item);
-
-});
-
-</script>
-
-<!-- GALLERY_SCRIPT_END -->
-
-
-    <script>
-
-        const imageViewer =
-            document.getElementById("imageViewer");
-
-        const viewerImage =
-            document.getElementById("viewerImage");
-
-
-        document.addEventListener("dblclick", function(event) {
-
-            if (event.target.tagName === "IMG" &&
-                event.target.closest(".gallery")) {
-
-                viewerImage.src = event.target.src;
-
-                viewerImage.alt = event.target.alt;
-
-                imageViewer.classList.add("active");
-
-            }
-
-        });
-
-
-        imageViewer.addEventListener("click", function(event) {
-
-            if (event.target === imageViewer) {
-
-                imageViewer.classList.remove("active");
-
-                viewerImage.src = "";
-
-            }
-
-        });
-
-
-        document.addEventListener("keydown", function(event) {
-
-            if (event.key === "Escape") {
-
-                imageViewer.classList.remove("active");
-
-                viewerImage.src = "";
-
-            }
-
-        });
-
-    </script>
-
-
+    <script type="module" src="../js/art.js"></script>
 </body>
-
 </html>

@@ -1,0 +1,195 @@
+@font-face {
+            font-family: 'CMUNRM';
+            src: url('../fonts/cmunrm.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000000;
+            color: #ffffff;
+            font-family: 'CMUNRM', serif;
+        }
+
+        .back {
+            position: fixed;
+            top: 25px;
+            left: 30px;
+            color: #00ffff;
+            text-decoration: none;
+            font-size: 1.2rem;
+            z-index: 100;
+        }
+
+        .back:hover {
+            color: #ff00ff;
+        }
+
+        .art {
+            width: 90%;
+            margin: 70px auto 60px;
+            display: flex;
+            gap: 2px;
+        }
+
+        .window {
+            flex: 1;
+            min-width: 0;
+            padding: 0 35px 40px;
+        }
+
+        .window:first-child {
+            border-right: 1px solid #333333;
+        }
+
+        .window-title {
+            text-align: center;
+	  color: #ff00ff;
+            font-size: 1.5rem;
+            font-weight: normal;
+            margin: 0 0 40px;
+        }
+
+        .link {
+            display: block;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .link:hover {
+            color: #00ffff;
+        }
+
+        /* GALLERY */
+
+        .gallery {
+            column-count: 2;
+            column-gap: 20px;
+        }
+
+        .item {
+            break-inside: avoid;
+            margin-bottom: 20px;
+        }
+
+        .item img,
+        .item video {
+            width: 100%;
+            height: auto;
+            display: block;
+            background: #111111;
+        }
+
+        .item img {
+            cursor: zoom-in;
+        }
+
+        .item img:hover,
+        .item video:hover {
+            outline: 1px solid #00ffff;
+        }
+
+        /* DOWNLOAD BUTTON STYLING */
+        .download-btn {
+            display: block;
+            margin-top: 12px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            color: #00ffff;
+            text-decoration: none;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 4px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            color: #ffffff;
+            border-color: #ffffff;
+        }
+
+        /* IMAGE PLACEHOLDER */
+        .item img {
+            min-height: 200px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        }
+
+        .item img[src=""] {
+            display: none;
+        }
+
+
+        /* FULLSCREEN IMAGE */
+
+        .image-viewer {
+            display: none;
+
+            position: fixed;
+
+            top: 0;
+            left: 0;
+
+            width: 100vw;
+            height: 100vh;
+
+            background: rgba(0, 0, 0, 0.95);
+
+            z-index: 1000;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 30px;
+
+            cursor: zoom-out;
+        }
+
+        .image-viewer.active {
+            display: flex;
+        }
+
+        .image-viewer img {
+
+            max-width: 95vw;
+            max-height: 95vh;
+
+            width: auto;
+            height: auto;
+
+            object-fit: contain;
+
+            cursor: default;
+        }
+
+
+        /* MOBILE */
+
+        @media (max-width: 700px) {
+
+            .art {
+                display: block;
+            }
+
+            .window:first-child {
+                border-right: none;
+                border-bottom: 1px solid #333333;
+                margin-bottom: 50px;
+            }
+
+            .gallery {
+                column-count: 1;
+            }
+
+        }

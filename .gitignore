@@ -43,3 +43,6 @@ node_modules/
 dist/
 build/
 *.log
+
+# Local full-quality film master; publish the browser-compatible copy instead.
+art/myart/Film.mp4
