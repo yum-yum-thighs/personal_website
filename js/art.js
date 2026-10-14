@@ -61,18 +61,65 @@ async function renderGallery() {
                 item.append(image, download);
             } else if (file.type === 'video') {
                 const video = document.createElement('video');
-                video.src = file.web;
                 video.controls = true;
-                video.preload = 'metadata';
+                video.preload = 'none';
                 video.playsInline = true;
+                video.hidden = true;
                 video.setAttribute('aria-label', file.title || file.name);
+                if (file.poster) video.poster = file.poster;
+                const container = document.createElement('div');
+                container.className = 'video-preview';
+                const play = document.createElement('button');
+                play.type = 'button';
+                play.className = 'video-play';
+                play.setAttribute('aria-label', `Play ${file.title || file.name}`);
+                if (file.poster) {
+                    const poster = document.createElement('img');
+                    poster.src = file.poster;
+                    poster.alt = '';
+                    poster.loading = 'lazy';
+                    poster.decoding = 'async';
+                    if (file.width && file.height) {
+                        poster.width = video.width = file.width;
+                        poster.height = video.height = file.height;
+                    }
+                    play.append(poster);
+                }
+                const label = document.createElement('span');
+                label.textContent = `▶ Play ${file.title || file.name}`;
+                play.append(label);
+                const status = document.createElement('p');
+                status.className = 'video-status';
+                status.setAttribute('role', 'status');
+                play.addEventListener('click', () => {
+                    gallery.querySelectorAll('video').forEach(other => {
+                        if (other !== video) other.pause();
+                    });
+                    video.hidden = false;
+                    play.hidden = true;
+                    status.textContent = 'Loading video…';
+                    if (!video.getAttribute('src')) video.src = file.web;
+                    video.play().catch(error => {
+                        if (error.name !== 'AbortError') status.textContent = 'Use the video’s play button to start.';
+                    });
+                });
+                video.addEventListener('playing', () => { status.textContent = ''; });
+                video.addEventListener('waiting', () => { status.textContent = 'Loading video…'; });
+                video.addEventListener('error', () => {
+                    status.textContent = 'This video couldn’t load. Try again or use Download Video.';
+                    video.hidden = true;
+                    play.hidden = false;
+                    video.removeAttribute('src');
+                    video.load();
+                });
                 const download = document.createElement('a');
                 download.href = file.highRes;
                 download.download = file.name;
                 download.className = 'download-btn';
                 download.textContent = 'Download Video';
                 video.append('Your browser cannot play this video. Use Download Video below.');
-                item.append(video, download);
+                container.append(video, play);
+                item.append(container, status, download);
             } else continue;
             fragment.append(item);
         }

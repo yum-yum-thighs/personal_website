@@ -1,0 +1,20 @@
+{
+  "film.mp4": {
+    "name": "Film.mp4",
+    "title": "Film",
+    "poster": "web/film-poster.webp",
+    "width": 1280,
+    "height": 720,
+    "duration": 122.816,
+    "version": "d028fd03903a"
+  },
+  "tree.mp4": {
+    "name": "Tree.mp4",
+    "title": "Tree",
+    "poster": "web/Tree-poster.webp",
+    "width": 720,
+    "height": 1280,
+    "duration": 7.0,
+    "version": "e77334d22d1d"
+  }
+}

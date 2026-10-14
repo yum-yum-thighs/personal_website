@@ -20,8 +20,21 @@ The existing `loop.mkv` is kept but skipped; export an MP4 to display it.
 `Film.mp4` lives in `art/myart/` and appears in My Art without a filename caption.
 Its H.264/AAC playback copy is `art/web/film.mp4`; the browser-compatible copy is downloadable. The full-quality master stays local
 and is excluded from Git because it exceeds GitHub's per-file limit.
-To recreate that playback copy, run `python scripts/prepare_film.py` (requires PyAV),
+To create the smaller playback copies and posters, run `python scripts/prepare_videos.py`
+(requires PyAV and Pillow),
 then `python scripts/update_art.py`.
+
+Film plays from `art/web/film.mp4`; Tree plays from `art/web/Tree.mp4` while its
+original download stays in `art/myart/Tree.mp4`. The playback copies use H.264,
+preserve audio, keep MP4 startup information at the beginning, and fit within
+1280 pixels. Posters appear immediately. The gallery loads video data only after
+the visitor presses Play. `art/web/video-info.json` stores dimensions, posters,
+and content versions so the refresh command keeps these optimizations.
+
+The local Film master remains untouched. When it is absent in another checkout,
+the preparation script keeps an already prepared playback copy instead of
+recompressing it. Legacy `scripts/prepare_film.py` remains available for an earlier
+full-resolution export; use `prepare_videos.py` for the faster gallery version.
 
 The command scans files alphabetically and writes `art/gallery.json`.
 Deleting a file and rerunning it removes the artwork from the gallery.

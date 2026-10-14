@@ -99,6 +99,33 @@
             outline: 1px solid #00ffff;
         }
 
+        .video-preview [hidden] { display: none !important; }
+        .video-play {
+            position: relative;
+            width: 100%;
+            min-height: 150px;
+            padding: 0;
+            border: 0;
+            color: #fff;
+            background: #111;
+            font: inherit;
+            cursor: pointer;
+        }
+        .video-play img { min-height: 0; cursor: pointer; }
+        .video-play span {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 16px 8px;
+            background: linear-gradient(transparent, #000e);
+            color: #00ffff;
+            text-align: center;
+        }
+        .video-play:focus-visible { outline: 2px solid #00ffff; outline-offset: 4px; }
+        .video-status { margin: 8px 0 0; font-size: .85rem; color: #ddd; }
+        .video-status:empty { display: none; }
+
         /* DOWNLOAD BUTTON STYLING */
         .download-btn {
             display: block;

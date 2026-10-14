@@ -17,4 +17,9 @@ through HTTP. Original art is in `art/myart/`; previews are in `art/web/`.
 `art/projects.json` is the source for art project links. `art/gallery.json` is
 created by the refresh command. Old root Python commands remain compatible.
 
+Gallery videos use lightweight, fast-start playback copies and small posters.
+Video data is requested when the visitor presses Play. Run
+`python scripts/prepare_videos.py` before refreshing the gallery to prepare these
+copies (requires PyAV and Pillow); source videos remain available locally.
+
 Rayway is retained in its original location, untouched and unlinked.

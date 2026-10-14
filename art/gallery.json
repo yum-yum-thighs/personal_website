@@ -21,8 +21,11 @@
     "name": "Film.mp4",
     "title": "Film",
     "type": "video",
-    "web": "web/film.mp4",
-    "highRes": "web/film.mp4"
+    "web": "web/film.mp4?v=d028fd03903a",
+    "highRes": "web/film.mp4?v=d028fd03903a",
+    "poster": "web/film-poster.webp?v=d028fd03903a",
+    "width": 1280,
+    "height": 720
   },
   {
     "name": "Floral.png",
@@ -76,8 +79,11 @@
     "name": "Tree.mp4",
     "title": "Tree",
     "type": "video",
-    "web": "myart/Tree.mp4",
-    "highRes": "myart/Tree.mp4"
+    "web": "web/Tree.mp4?v=e77334d22d1d",
+    "highRes": "myart/Tree.mp4",
+    "poster": "web/Tree-poster.webp?v=e77334d22d1d",
+    "width": 720,
+    "height": 1280
   },
   {
     "name": "Tree.png",
