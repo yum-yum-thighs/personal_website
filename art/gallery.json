@@ -18,6 +18,12 @@
     "highRes": "myart/Crystal2.png"
   },
   {
+    "name": "Desert and Newton's Cradle.png",
+    "type": "image",
+    "web": "web/Desert and Newton's Cradle.webp",
+    "highRes": "myart/Desert and Newton's Cradle.png"
+  },
+  {
     "name": "Film.mp4",
     "title": "Film",
     "type": "video",
