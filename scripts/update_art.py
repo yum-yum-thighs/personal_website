@@ -14,6 +14,9 @@ def update_art():
     except ImportError:
         Image = None
     (ART / 'web').mkdir(exist_ok=True)
+    (ART / 'web/thumbs').mkdir(exist_ok=True)
+    manifest = ART / 'gallery.json'
+    previous = {item['name']: item for item in json.loads(manifest.read_text(encoding='utf-8'))} if manifest.exists() else {}
     info_path = ART / 'web/video-info.json'
     video_info = json.loads(info_path.read_text(encoding='utf-8')) if info_path.exists() else {}
     def video_details(playback):
@@ -50,7 +53,20 @@ def update_art():
                 except (OSError, ValueError) as error:
                     print(f'Preview skipped for {source.name}: {error}')
             web = ('web/' + preview.name) if unique and preview.exists() and ext != '.gif' else original
-            files.append(dict(name=source.name, type='image', web=web, highRes=original))
+            details = {key: previous.get(source.name, {})[key] for key in ('thumbnail', 'width', 'height')
+                       if key in previous.get(source.name, {})}
+            if Image:
+                with Image.open(source) as image:
+                    image = ImageOps.exif_transpose(image)
+                    details.update(width=image.width, height=image.height)
+                    if unique and ext != '.gif':
+                        thumbnail = ART / 'web/thumbs' / (source.stem + '.webp')
+                        if not thumbnail.exists() or source.stat().st_mtime > thumbnail.stat().st_mtime:
+                            image.thumbnail((640, 640))
+                            image.convert('RGBA' if 'A' in image.getbands() else 'RGB').save(
+                                thumbnail, 'WEBP', quality=76)
+                        details['thumbnail'] = 'web/thumbs/' + thumbnail.name
+            files.append(dict(name=source.name, type='image', web=web, highRes=original, **details))
         elif ext in VIDEOS:
             playback = ART / 'web' / ('film.mp4' if source.name == 'Film.mp4' else source.name)
             web = video_url(playback) if playback.exists() else original

@@ -3,98 +3,137 @@
     "name": "Box.png",
     "type": "image",
     "web": "web/Box.webp",
-    "highRes": "myart/Box.png"
+    "highRes": "myart/Box.png",
+    "width": 1920,
+    "height": 1080,
+    "thumbnail": "web/thumbs/Box.webp"
   },
   {
     "name": "Box2.png",
     "type": "image",
     "web": "web/Box2.webp",
-    "highRes": "myart/Box2.png"
+    "highRes": "myart/Box2.png",
+    "width": 3840,
+    "height": 2160,
+    "thumbnail": "web/thumbs/Box2.webp"
   },
   {
     "name": "Crystal2.png",
     "type": "image",
     "web": "web/Crystal2.webp",
-    "highRes": "myart/Crystal2.png"
+    "highRes": "myart/Crystal2.png",
+    "width": 4160,
+    "height": 2160,
+    "thumbnail": "web/thumbs/Crystal2.webp"
   },
   {
     "name": "Desert and Newton's Cradle.png",
     "type": "image",
     "web": "web/Desert and Newton's Cradle.webp",
-    "highRes": "myart/Desert and Newton's Cradle.png"
+    "highRes": "myart/Desert and Newton's Cradle.png",
+    "width": 720,
+    "height": 576,
+    "thumbnail": "web/thumbs/Desert and Newton's Cradle.webp"
   },
   {
     "name": "Film.mp4",
     "title": "Film",
     "type": "video",
-    "web": "web/film.mp4?v=d028fd03903a",
-    "highRes": "web/film.mp4?v=d028fd03903a",
-    "poster": "web/film-poster.webp?v=d028fd03903a",
-    "width": 1280,
-    "height": 720
+    "web": "web/film.mp4?v=7c7fb5dbfbf9",
+    "highRes": "web/film.mp4?v=7c7fb5dbfbf9",
+    "poster": "web/film-poster.webp?v=7c7fb5dbfbf9",
+    "width": 960,
+    "height": 540
   },
   {
     "name": "Floral.png",
     "type": "image",
     "web": "web/Floral.webp",
-    "highRes": "myart/Floral.png"
+    "highRes": "myart/Floral.png",
+    "width": 3840,
+    "height": 2160,
+    "thumbnail": "web/thumbs/Floral.webp"
   },
   {
     "name": "Fold.png",
     "type": "image",
     "web": "web/Fold.webp",
-    "highRes": "myart/Fold.png"
+    "highRes": "myart/Fold.png",
+    "width": 3840,
+    "height": 2160,
+    "thumbnail": "web/thumbs/Fold.webp"
   },
   {
     "name": "Hall.png",
     "type": "image",
     "web": "web/Hall.webp",
-    "highRes": "myart/Hall.png"
+    "highRes": "myart/Hall.png",
+    "width": 4096,
+    "height": 1716,
+    "thumbnail": "web/thumbs/Hall.webp"
   },
   {
     "name": "Horn.png",
     "type": "image",
     "web": "web/Horn.webp",
-    "highRes": "myart/Horn.png"
+    "highRes": "myart/Horn.png",
+    "width": 3840,
+    "height": 2160,
+    "thumbnail": "web/thumbs/Horn.webp"
   },
   {
     "name": "House.png",
     "type": "image",
     "web": "web/House.webp",
-    "highRes": "myart/House.png"
+    "highRes": "myart/House.png",
+    "width": 2160,
+    "height": 3840,
+    "thumbnail": "web/thumbs/House.webp"
   },
   {
     "name": "Lamp.png",
     "type": "image",
     "web": "web/Lamp.webp",
-    "highRes": "myart/Lamp.png"
+    "highRes": "myart/Lamp.png",
+    "width": 2160,
+    "height": 3840,
+    "thumbnail": "web/thumbs/Lamp.webp"
   },
   {
     "name": "Metalheart_1.png",
     "type": "image",
     "web": "web/Metalheart_1.webp",
-    "highRes": "myart/Metalheart_1.png"
+    "highRes": "myart/Metalheart_1.png",
+    "width": 1920,
+    "height": 1080,
+    "thumbnail": "web/thumbs/Metalheart_1.webp"
   },
   {
     "name": "Planet.png",
     "type": "image",
     "web": "web/Planet.webp",
-    "highRes": "myart/Planet.png"
+    "highRes": "myart/Planet.png",
+    "width": 3840,
+    "height": 2160,
+    "thumbnail": "web/thumbs/Planet.webp"
   },
   {
     "name": "Tree.mp4",
     "title": "Tree",
     "type": "video",
-    "web": "web/Tree.mp4?v=e77334d22d1d",
+    "web": "web/Tree.mp4?v=2ecc74f3d917",
     "highRes": "myart/Tree.mp4",
-    "poster": "web/Tree-poster.webp?v=e77334d22d1d",
-    "width": 720,
-    "height": 1280
+    "poster": "web/Tree-poster.webp?v=2ecc74f3d917",
+    "width": 540,
+    "height": 960
   },
   {
     "name": "Tree.png",
     "type": "image",
     "web": "web/Tree.webp",
-    "highRes": "myart/Tree.png"
+    "highRes": "myart/Tree.png",
+    "width": 3840,
+    "height": 2160,
+    "thumbnail": "web/thumbs/Tree.webp"
   }
 ]

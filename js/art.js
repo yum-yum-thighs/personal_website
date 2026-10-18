@@ -14,7 +14,7 @@ function closeViewer() {
 
 function openViewer(image) {
     previousFocus = image;
-    preview.src = image.src;
+    preview.src = image.dataset.preview || image.src;
     preview.alt = image.alt;
     viewer.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -33,19 +33,28 @@ async function renderGallery() {
     try {
         const files = await loadJSON('./gallery.json');
         const fragment = document.createDocumentFragment();
+        let imageIndex = 0;
         for (const file of files) {
             const item = document.createElement('div');
             item.className = 'item';
             if (file.type === 'image') {
                 const image = document.createElement('img');
-                image.src = file.web;
+                image.src = file.thumbnail || file.web;
+                image.dataset.preview = file.web;
+                if (file.width && file.height) {
+                    image.width = file.width;
+                    image.height = file.height;
+                }
                 image.alt = file.title || file.name;
-                image.loading = 'lazy';
+                image.loading = imageIndex < 2 ? 'eager' : 'lazy';
+                if (imageIndex === 0) image.fetchPriority = 'high';
+                imageIndex++;
                 image.decoding = 'async';
                 image.tabIndex = 0;
                 image.setAttribute('aria-label', `${image.alt}. Double-click or press Enter to enlarge.`);
                 image.addEventListener('error', () => {
-                    if (image.getAttribute('src') !== file.highRes) image.src = file.highRes;
+                    if (image.getAttribute('src') !== file.web) image.src = file.web;
+                    else image.removeAttribute('src');
                 });
                 image.addEventListener('dblclick', () => openViewer(image));
                 image.addEventListener('keydown', event => {
@@ -88,10 +97,20 @@ async function renderGallery() {
                 const label = document.createElement('span');
                 label.textContent = `▶ Play ${file.title || file.name}`;
                 play.append(label);
+                // Warm the nearby player's metadata before a click, without starting playback.
+                const warmup = new IntersectionObserver(entries => {
+                    if (!entries.some(entry => entry.isIntersecting)) return;
+                    video.preload = 'metadata';
+                    video.src = file.web;
+                    video.load();
+                    warmup.disconnect();
+                }, { rootMargin: '100px' });
+                warmup.observe(container);
                 const status = document.createElement('p');
                 status.className = 'video-status';
                 status.setAttribute('role', 'status');
                 play.addEventListener('click', () => {
+                    warmup.disconnect();
                     gallery.querySelectorAll('video').forEach(other => {
                         if (other !== video) other.pause();
                     });

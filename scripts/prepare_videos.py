@@ -32,7 +32,7 @@ def prepare(original, filename, title):
     with av.open(str(source)) as incoming:
         original_video = incoming.streams.video[0]
         original_video.thread_type = 'AUTO'
-        ratio = min(1, 1280 / max(original_video.width, original_video.height))
+        ratio = min(1, 960 / max(original_video.width, original_video.height))
         width = max(2, int(original_video.width * ratio) // 2 * 2)
         height = max(2, int(original_video.height * ratio) // 2 * 2)
         rate = min(original_video.average_rate or Fraction(30), Fraction(30))
@@ -45,7 +45,8 @@ def prepare(original, filename, title):
             video = outgoing.add_stream('libx264', rate=rate)
             video.width, video.height = width, height
             video.pix_fmt = 'yuv420p'
-            video.options = {'crf': '27', 'preset': 'fast', 'g': str(round(float(rate) * 2))}
+            video.options = {'crf': '28', 'preset': 'fast', 'maxrate': '850k',
+                             'bufsize': '1700k', 'g': str(round(float(rate)))}
             video.thread_type = 'AUTO'
             audio = {}
             for stream in incoming.streams.audio:

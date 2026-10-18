@@ -1,6 +1,7 @@
 @font-face {
             font-family: 'CMUNRM';
-            src: url('../fonts/cmunrm.ttf') format('truetype');
+            src: url('../fonts/cmunrm.woff2') format('woff2');
+            font-display: swap;
             font-weight: normal;
             font-style: normal;
         }

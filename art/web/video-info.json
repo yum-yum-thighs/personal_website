@@ -2,19 +2,19 @@
   "film.mp4": {
     "name": "Film.mp4",
     "title": "Film",
+    "version": "7c7fb5dbfbf9",
     "poster": "web/film-poster.webp",
-    "width": 1280,
-    "height": 720,
-    "duration": 122.816,
-    "version": "d028fd03903a"
+    "width": 960,
+    "height": 540,
+    "duration": 122.816
   },
   "tree.mp4": {
     "name": "Tree.mp4",
     "title": "Tree",
+    "version": "2ecc74f3d917",
     "poster": "web/Tree-poster.webp",
-    "width": 720,
-    "height": 1280,
-    "duration": 7.0,
-    "version": "e77334d22d1d"
+    "width": 540,
+    "height": 960,
+    "duration": 7.0
   }
 }

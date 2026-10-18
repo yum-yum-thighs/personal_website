@@ -27,7 +27,7 @@ then `python scripts/update_art.py`.
 Film plays from `art/web/film.mp4`; Tree plays from `art/web/Tree.mp4` while its
 original download stays in `art/myart/Tree.mp4`. The playback copies use H.264,
 preserve audio, keep MP4 startup information at the beginning, and fit within
-1280 pixels. Posters appear immediately. The gallery loads video data only after
+960 pixels with a capped video bitrate for slower connections. Posters appear immediately. The gallery loads video data only after
 the visitor presses Play. `art/web/video-info.json` stores dimensions, posters,
 and content versions so the refresh command keeps these optimizations.
 
@@ -124,3 +124,7 @@ diary/                 Diary posts and template
 If content does not appear, run the refresh command, confirm the filename,
 check JSON commas, and reload the HTTP preview. A video that does not play
 usually needs a browser-compatible MP4 (H.264) or WebM export.
+
+Gallery images use generated 640-pixel thumbnails in `art/web/thumbs/`.
+Enlarging an image loads its larger preview; Download High-Res keeps the original.
+Run `python scripts/update_art.py` after adding art and include its generated files in your commit.
