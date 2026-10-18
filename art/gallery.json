@@ -2,38 +2,38 @@
   {
     "name": "Box.png",
     "type": "image",
-    "web": "web/Box.webp",
+    "web": "web/Box.webp?v=43cc48e24420",
     "highRes": "myart/Box.png",
+    "thumbnail": "web/thumbs/Box.webp?v=10815f4c5d5f",
     "width": 1920,
-    "height": 1080,
-    "thumbnail": "web/thumbs/Box.webp"
+    "height": 1080
   },
   {
     "name": "Box2.png",
     "type": "image",
-    "web": "web/Box2.webp",
+    "web": "web/Box2.webp?v=f4d73f3f038d",
     "highRes": "myart/Box2.png",
+    "thumbnail": "web/thumbs/Box2.webp?v=6679d977ba15",
     "width": 3840,
-    "height": 2160,
-    "thumbnail": "web/thumbs/Box2.webp"
+    "height": 2160
   },
   {
     "name": "Crystal2.png",
     "type": "image",
-    "web": "web/Crystal2.webp",
+    "web": "web/Crystal2.webp?v=9303bd57fe0d",
     "highRes": "myart/Crystal2.png",
+    "thumbnail": "web/thumbs/Crystal2.webp?v=842900a24c3b",
     "width": 4160,
-    "height": 2160,
-    "thumbnail": "web/thumbs/Crystal2.webp"
+    "height": 2160
   },
   {
     "name": "Desert and Newton's Cradle.png",
     "type": "image",
-    "web": "web/Desert and Newton's Cradle.webp",
+    "web": "web/Desert and Newton's Cradle.webp?v=c544b7c5cb95",
     "highRes": "myart/Desert and Newton's Cradle.png",
+    "thumbnail": "web/thumbs/Desert and Newton's Cradle.webp?v=92f44641d962",
     "width": 720,
-    "height": 576,
-    "thumbnail": "web/thumbs/Desert and Newton's Cradle.webp"
+    "height": 576
   },
   {
     "name": "Film.mp4",
@@ -48,74 +48,74 @@
   {
     "name": "Floral.png",
     "type": "image",
-    "web": "web/Floral.webp",
+    "web": "web/Floral.webp?v=73a080e88fec",
     "highRes": "myart/Floral.png",
+    "thumbnail": "web/thumbs/Floral.webp?v=f929948df422",
     "width": 3840,
-    "height": 2160,
-    "thumbnail": "web/thumbs/Floral.webp"
+    "height": 2160
   },
   {
     "name": "Fold.png",
     "type": "image",
-    "web": "web/Fold.webp",
+    "web": "web/Fold.webp?v=137ae6865e16",
     "highRes": "myart/Fold.png",
+    "thumbnail": "web/thumbs/Fold.webp?v=d8a3d757183c",
     "width": 3840,
-    "height": 2160,
-    "thumbnail": "web/thumbs/Fold.webp"
+    "height": 2160
   },
   {
     "name": "Hall.png",
     "type": "image",
-    "web": "web/Hall.webp",
+    "web": "web/Hall.webp?v=3dafbe554b74",
     "highRes": "myart/Hall.png",
+    "thumbnail": "web/thumbs/Hall.webp?v=9eeda9b642d6",
     "width": 4096,
-    "height": 1716,
-    "thumbnail": "web/thumbs/Hall.webp"
+    "height": 1716
   },
   {
     "name": "Horn.png",
     "type": "image",
-    "web": "web/Horn.webp",
+    "web": "web/Horn.webp?v=c84b57a4d1ad",
     "highRes": "myart/Horn.png",
+    "thumbnail": "web/thumbs/Horn.webp?v=09b7ff4981c1",
     "width": 3840,
-    "height": 2160,
-    "thumbnail": "web/thumbs/Horn.webp"
+    "height": 2160
   },
   {
     "name": "House.png",
     "type": "image",
-    "web": "web/House.webp",
+    "web": "web/House.webp?v=84e9f80820f5",
     "highRes": "myart/House.png",
+    "thumbnail": "web/thumbs/House.webp?v=2e269e7b3e8b",
     "width": 2160,
-    "height": 3840,
-    "thumbnail": "web/thumbs/House.webp"
+    "height": 3840
   },
   {
     "name": "Lamp.png",
     "type": "image",
-    "web": "web/Lamp.webp",
+    "web": "web/Lamp.webp?v=d6c5bce39096",
     "highRes": "myart/Lamp.png",
+    "thumbnail": "web/thumbs/Lamp.webp?v=4531fba325be",
     "width": 2160,
-    "height": 3840,
-    "thumbnail": "web/thumbs/Lamp.webp"
+    "height": 3840
   },
   {
     "name": "Metalheart_1.png",
     "type": "image",
-    "web": "web/Metalheart_1.webp",
+    "web": "web/Metalheart_1.webp?v=d95174465d9e",
     "highRes": "myart/Metalheart_1.png",
+    "thumbnail": "web/thumbs/Metalheart_1.webp?v=ddb3261dbeff",
     "width": 1920,
-    "height": 1080,
-    "thumbnail": "web/thumbs/Metalheart_1.webp"
+    "height": 1080
   },
   {
     "name": "Planet.png",
     "type": "image",
-    "web": "web/Planet.webp",
+    "web": "web/Planet.webp?v=8819092dd082",
     "highRes": "myart/Planet.png",
+    "thumbnail": "web/thumbs/Planet.webp?v=44ac31494b94",
     "width": 3840,
-    "height": 2160,
-    "thumbnail": "web/thumbs/Planet.webp"
+    "height": 2160
   },
   {
     "name": "Tree.mp4",
@@ -130,10 +130,10 @@
   {
     "name": "Tree.png",
     "type": "image",
-    "web": "web/Tree.webp",
+    "web": "web/Tree.webp?v=7988572c60dd",
     "highRes": "myart/Tree.png",
+    "thumbnail": "web/thumbs/Tree.webp?v=faa293984b7f",
     "width": 3840,
-    "height": 2160,
-    "thumbnail": "web/thumbs/Tree.webp"
+    "height": 2160
   }
 ]

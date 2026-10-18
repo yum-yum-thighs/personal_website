@@ -1,6 +1,7 @@
 """Refresh the art manifest; optionally create WebP previews with Pillow."""
 from pathlib import Path
 import json
+import hashlib
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / 'art'
@@ -66,6 +67,15 @@ def update_art():
                             image.convert('RGBA' if 'A' in image.getbands() else 'RGB').save(
                                 thumbnail, 'WEBP', quality=76)
                         details['thumbnail'] = 'web/thumbs/' + thumbnail.name
+            # Replacing artwork under the same filename must also refresh browser caches.
+            for key, path in [('web', web), ('thumbnail', details.get('thumbnail'))]:
+                if path:
+                    version = hashlib.sha256((ART / path.split('?', 1)[0]).read_bytes()).hexdigest()[:12]
+                    versioned = path.split('?', 1)[0] + '?v=' + version
+                    if key == 'web':
+                        web = versioned
+                    else:
+                        details[key] = versioned
             files.append(dict(name=source.name, type='image', web=web, highRes=original, **details))
         elif ext in VIDEOS:
             playback = ART / 'web' / ('film.mp4' if source.name == 'Film.mp4' else source.name)
