@@ -118,6 +118,15 @@
     "height": 2160
   },
   {
+    "name": "Prism.png",
+    "type": "image",
+    "web": "web/Prism.webp?v=a24805f2805f",
+    "highRes": "myart/Prism.png",
+    "width": 1080,
+    "height": 1080,
+    "thumbnail": "web/thumbs/Prism.webp?v=a938e9c1e5ca"
+  },
+  {
     "name": "Tree.mp4",
     "title": "Tree",
     "type": "video",
