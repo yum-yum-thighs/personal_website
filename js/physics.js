@@ -58,7 +58,7 @@ export function initPhysics() {
 
         const inset = 10;
         const walls = [
-            Bodies.rectangle(width / 2, groundY + wallThickness / 2, width * 2, wallThickness, { isStatic: true, restitution: 1, friction: 0, render: { visible: false } }),
+            Bodies.rectangle(width / 2, groundY + wallThickness / 2, width * 2, wallThickness, { isStatic: true, restitution: 0.6, friction: 0.04, render: { visible: false } }),
             Bodies.rectangle(width / 2, -wallThickness / 2, width * 2, wallThickness, { isStatic: true, render: { visible: false } }),
             Bodies.rectangle(inset - wallThickness / 2, height / 2, wallThickness, height * 2, { isStatic: true, render: { visible: false } }),
             Bodies.rectangle(width - inset + wallThickness / 2, height / 2, wallThickness, height * 2, { isStatic: true, render: { visible: false } })
@@ -66,18 +66,17 @@ export function initPhysics() {
 
         const minSpawnY = bannerBottom + cradleLength + (ballSize + boxSize) / 2 + 12;
         const maxSpawnY = groundY - boxSize / 2 - 12;
-        const boxes = CONFIG.links.map((link, index) => {
+        const boxes = CONFIG.links.map(link => {
             const y = Math.min(maxSpawnY, Math.max(link.y, minSpawnY));
             const body = Bodies.rectangle(width / 2 + link.xOffset * xScale, y, boxSize, boxSize, {
-                restitution: 1,
-                friction: 0,
-                frictionStatic: 0,
-                frictionAir: 0.001,
+                restitution: 0.6,
+                friction: 0.04,
+                frictionStatic: 0.08,
+                frictionAir: 0.01,
                 render: { fillStyle: '#111111', strokeStyle: '#00ffff', lineWidth: 2 }
             });
             body.customLabel = link.label;
             body.targetUrl = link.url;
-            Body.setVelocity(body, { x: (index - (CONFIG.links.length - 1) / 2) * 0.35, y: 0 });
             return body;
         });
 
@@ -117,16 +116,10 @@ export function initPhysics() {
 
     Events.on(engine, 'afterUpdate', () => {
         const inset = 12;
-        const minimumBounce = Math.max(8, Math.min(13, window.innerHeight * 0.016));
-        navigationBodies.forEach((body, index) => {
+        navigationBodies.forEach(body => {
             const dx = body.bounds.min.x < inset ? inset - body.bounds.min.x
                 : body.bounds.max.x > window.innerWidth - inset ? window.innerWidth - inset - body.bounds.max.x : 0;
             if (dx) Body.translate(body, { x: dx, y: 0 });
-            if (body.bounds.max.y >= groundY - 2 && body.velocity.y > -4) {
-                const x = Math.abs(body.velocity.x) < 0.3
-                    ? (index - (navigationBodies.length - 1) / 2) * 0.35 : body.velocity.x;
-                Body.setVelocity(body, { x, y: -minimumBounce });
-            }
         });
     });
 
