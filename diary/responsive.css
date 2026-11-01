@@ -1,0 +1,27 @@
+@media (max-width: 700px) {
+    .back { left: 16px; }
+
+    .diary,
+    article {
+        width: calc(100% - 32px);
+        margin: 80px auto 40px;
+    }
+
+    h1 {
+        font-size: clamp(2rem, 9vw, 3rem);
+        overflow-wrap: anywhere;
+    }
+
+    .post {
+        grid-template-columns: auto 1fr;
+        gap: 6px 16px;
+        font-size: 1.15rem;
+    }
+
+    .post .title {
+        grid-column: 1 / -1;
+        overflow-wrap: anywhere;
+    }
+
+    .content { font-size: 1.15rem; }
+}

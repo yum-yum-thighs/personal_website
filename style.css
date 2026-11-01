@@ -95,3 +95,17 @@ canvas {
     83%  { color: #0000ff; }
     100% { color: #ff00ff; }
 }
+
+@media (max-width: 700px) {
+    #ui-layer {
+        top: max(20px, env(safe-area-inset-top));
+    }
+
+    .welcome-banner h1 {
+        font-size: clamp(2rem, 10vw, 2.5rem);
+    }
+
+    .marquee-text {
+        font-size: 1.2rem;
+    }
+}

@@ -22,7 +22,7 @@ function openViewer(image) {
 }
 
 viewer.addEventListener('click', event => {
-    if (event.target === viewer) closeViewer();
+    if (event.target === viewer || (event.target === preview && window.matchMedia('(pointer: coarse)').matches)) closeViewer();
 });
 viewer.addEventListener('keydown', event => {
     if (event.key === 'Escape') closeViewer();
@@ -51,12 +51,15 @@ async function renderGallery() {
                 imageIndex++;
                 image.decoding = 'async';
                 image.tabIndex = 0;
-                image.setAttribute('aria-label', `${image.alt}. Double-click or press Enter to enlarge.`);
+                image.setAttribute('aria-label', `${image.alt}. Open to enlarge.`);
                 image.addEventListener('error', () => {
                     if (image.getAttribute('src') !== file.web) image.src = file.web;
                     else image.removeAttribute('src');
                 });
                 image.addEventListener('dblclick', () => openViewer(image));
+                image.addEventListener('click', () => {
+                    if (window.matchMedia('(pointer: coarse)').matches) openViewer(image);
+                });
                 image.addEventListener('keydown', event => {
                     if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault(); openViewer(image);

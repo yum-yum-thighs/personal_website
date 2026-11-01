@@ -1,20 +1,15 @@
 import { CONFIG, validateAllLinks } from './config.js';
 
 export function initPhysics() {
-    // Validate links on startup
     const validation = validateAllLinks();
-    if (!validation.valid) {
-        console.error('Link configuration errors:', validation.errors);
-    }
+    if (!validation.valid) console.error('Link configuration errors:', validation.errors);
 
-    const { Engine, Render, Runner, Bodies, Composite, Mouse, MouseConstraint, Events, Query, Constraint } = Matter;
-
+    const { Engine, Render, Runner, Bodies, Body, Composite, Mouse, MouseConstraint, Events, Query, Constraint } = Matter;
     const engine = Engine.create();
     const world = engine.world;
-
     const render = Render.create({
         element: document.body,
-        engine: engine,
+        engine,
         options: {
             width: window.innerWidth,
             height: window.innerHeight,
@@ -23,143 +18,171 @@ export function initPhysics() {
         }
     });
 
+    render.canvas.style.touchAction = 'none';
     Render.run(render);
-    const runner = Runner.create();
-    Runner.run(runner, engine);
+    Runner.run(Runner.create(), engine);
 
-    // Bulletproof Boundary walls
-    const wallThickness = 200;
-    const ground = Bodies.rectangle(window.innerWidth / 2, window.innerHeight + wallThickness / 2, window.innerWidth * 2, wallThickness, { isStatic: true, restitution: 1.0, render: { visible: false } });
-    const ceiling = Bodies.rectangle(window.innerWidth / 2, -wallThickness / 2 - 100, window.innerWidth * 2, wallThickness, { isStatic: true, restitution: 1.0, render: { visible: false } });
-    const leftWall = Bodies.rectangle(-wallThickness / 2 - 100, window.innerHeight / 2, wallThickness, window.innerHeight * 2, { isStatic: true, restitution: 1.0, render: { visible: false } });
-    const rightWall = Bodies.rectangle(window.innerWidth + wallThickness / 2, window.innerHeight / 2, wallThickness, window.innerHeight * 2, { isStatic: true, restitution: 1.0, render: { visible: false } });
-
-    Composite.add(world, [ground, ceiling, leftWall, rightWall]);
-
-    // 1. Create Free-Floating Navigation Boxes
-    // These boxes are created from the CONFIG.links array
-    // Each box becomes clickable and navigates to its configured URL
-    const scale = window.innerWidth < 800 ? window.innerWidth / 1000 : 1;
-    const boxSize = window.innerWidth < 800 ? CONFIG.boxSize * 0.7 : CONFIG.boxSize;
-
-    const boxBodies = CONFIG.links.map(data => {
-        const body = Bodies.rectangle(window.innerWidth / 2 + (data.xOffset * scale), data.y, boxSize, boxSize, {
-            restitution: 0.8,
-            frictionAir: 0.02,
-            render: {
-                fillStyle: '#111111',
-                strokeStyle: '#00ffff',
-                lineWidth: 2
-            }
-        });
-        // Store link data on the body for click handling
-        body.customLabel = data.label;
-        body.targetUrl = data.url;
-        return body;
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+        mouse,
+        constraint: { stiffness: 0.2, render: { visible: false } }
     });
+    Composite.add(world, mouseConstraint);
+    render.mouse = mouse;
 
-    Composite.add(world, boxBodies);
+    let sceneObjects = [];
+    let interactiveBodies = [];
+    let navigationBodies = [];
+    let labelSize = 26;
 
-    // 2. Find the exact bottom line of your top HTML banner
-    const uiLayer = document.getElementById('ui-layer');
-    const bannerBottom = uiLayer ? uiLayer.getBoundingClientRect().bottom : 80; 
+    function buildScene() {
+        for (const object of sceneObjects) Composite.remove(world, object);
+        sceneObjects = [];
 
-    // 3. Create Newton's Cradle (decorative physics simulation)
-    // These balls are purely decorative and don't have URLs
-    const centerX = window.innerWidth / 2;
-    const ballSize = CONFIG.cradle.ballSize;
-    const spacing = ballSize + 2; 
-    const totalWidth = CONFIG.cradle.items.length * spacing;
-    const startX = centerX - totalWidth / 2 + ballSize / 2;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const bannerBottom = document.getElementById('ui-layer').getBoundingClientRect().bottom;
+        const compact = width < 800;
+        const boxSize = compact ? CONFIG.boxSize * 0.7 : CONFIG.boxSize;
+        const maxOffset = Math.max(...CONFIG.links.map(link => Math.abs(link.xOffset)), 1);
+        const xScale = Math.min(1, Math.max(0, (width - boxSize - 24) / (2 * maxOffset)));
+        const wallThickness = 200;
 
-    const cradleBodies = [];
+        const inset = 10;
+        const walls = [
+            Bodies.rectangle(width / 2, height - inset + wallThickness / 2, width * 2, wallThickness, { isStatic: true, render: { visible: false } }),
+            Bodies.rectangle(width / 2, -wallThickness / 2, width * 2, wallThickness, { isStatic: true, render: { visible: false } }),
+            Bodies.rectangle(inset - wallThickness / 2, height / 2, wallThickness, height * 2, { isStatic: true, render: { visible: false } }),
+            Bodies.rectangle(width - inset + wallThickness / 2, height / 2, wallThickness, height * 2, { isStatic: true, render: { visible: false } })
+        ];
 
-    CONFIG.cradle.items.forEach((item, index) => {
-        const xPos = startX + (index * spacing);
-        const yPos = bannerBottom + CONFIG.cradle.length;
-
-        const pivot = { x: xPos, y: bannerBottom };
-
-        const body = Bodies.rectangle(xPos, yPos, ballSize, ballSize, {
-            restitution: 0.98,
-            friction: 0.0,
-            frictionAir: 0.001,
-            slop: 0.005,
-            render: {
-                fillStyle: '#111111',
-                strokeStyle: '#ff00ff',
-                lineWidth: 2
-            }
-        });
-        body.customLabel = item.label;
-        body.targetUrl = item.url || null; // Cradle items may not have URLs
-
-        const rope = Constraint.create({
-            pointA: pivot,
-            bodyB: body,
-            pointB: { x: 0, y: -ballSize / 2 },
-            length: CONFIG.cradle.length,
-            stiffness: 1.0,
-            render: {
-                strokeStyle: '#00ffff',
-                lineWidth: 1,
-                anchors: false
-            }
+        const boxes = CONFIG.links.map(link => {
+            const y = Math.min(link.y, height - boxSize / 2 - 12);
+            const body = Bodies.rectangle(width / 2 + link.xOffset * xScale, Math.max(bannerBottom + boxSize, y), boxSize, boxSize, {
+                restitution: 0.8,
+                frictionAir: 0.02,
+                render: { fillStyle: '#111111', strokeStyle: '#00ffff', lineWidth: 2 }
+            });
+            body.customLabel = link.label;
+            body.targetUrl = link.url;
+            return body;
         });
 
-        Composite.add(world, [body, rope]);
-        cradleBodies.push(body);
+        const cradleScale = Math.min(1, (width - 32) / (CONFIG.cradle.items.length * (CONFIG.cradle.ballSize + 2)));
+        const ballSize = Math.max(20, CONFIG.cradle.ballSize * cradleScale);
+        const spacing = ballSize + 2 * cradleScale;
+        const cradleLength = compact ? Math.min(CONFIG.cradle.length, Math.max(60, height * 0.22)) : CONFIG.cradle.length;
+        const startX = width / 2 - (CONFIG.cradle.items.length - 1) * spacing / 2;
+        const cradleBodies = [];
+        const ropes = [];
+
+        CONFIG.cradle.items.forEach((item, index) => {
+            const x = startX + index * spacing;
+            const body = Bodies.rectangle(x, bannerBottom + cradleLength, ballSize, ballSize, {
+                restitution: 0.98,
+                friction: 0,
+                frictionAir: 0.001,
+                slop: 0.005,
+                render: { fillStyle: '#111111', strokeStyle: '#ff00ff', lineWidth: 2 }
+            });
+            body.customLabel = item.label;
+            const rope = Constraint.create({
+                pointA: { x, y: bannerBottom },
+                bodyB: body,
+                pointB: { x: 0, y: -ballSize / 2 },
+                length: cradleLength,
+                stiffness: 1,
+                render: { strokeStyle: '#00ffff', lineWidth: 1, anchors: false }
+            });
+            cradleBodies.push(body);
+            ropes.push(rope);
+        });
+
+        sceneObjects = [...walls, ...boxes, ...cradleBodies, ...ropes];
+        interactiveBodies = [...boxes, ...cradleBodies];
+        navigationBodies = boxes;
+        labelSize = compact ? Math.max(18, ballSize * 0.58) : 26;
+        Composite.add(world, sceneObjects);
+    }
+
+    Events.on(engine, 'afterUpdate', () => {
+        const inset = 12;
+        for (const body of navigationBodies) {
+            const dx = body.bounds.min.x < inset ? inset - body.bounds.min.x
+                : body.bounds.max.x > window.innerWidth - inset ? window.innerWidth - inset - body.bounds.max.x : 0;
+            const dy = body.bounds.max.y > window.innerHeight - inset
+                ? window.innerHeight - inset - body.bounds.max.y : 0;
+            if (dx || dy) Body.translate(body, { x: dx, y: dy });
+        }
     });
-
-    const allInteractiveBodies = [...boxBodies, ...cradleBodies];
 
     Events.on(render, 'afterRender', () => {
         const context = render.context;
-        context.font = '26px "CMUNRM", serif'; // Slightly larger font for bigger boxes
+        context.font = `${labelSize}px "CMUNRM", serif`;
         context.fillStyle = '#ff00ff';
         context.textAlign = 'center';
         context.textBaseline = 'middle';
-
-        allInteractiveBodies.forEach(body => {
-            const { x, y } = body.position;
+        interactiveBodies.forEach(body => {
             context.save();
-            context.translate(x, y);
+            context.translate(body.position.x, body.position.y);
             context.rotate(body.angle);
             context.fillText(body.customLabel, 0, 0);
             context.restore();
         });
     });
 
-    const mouse = Mouse.create(render.canvas);
-    const mouseConstraint = MouseConstraint.create(engine, {
-        mouse: mouse,
-        constraint: {
-            stiffness: 0.2,
-            render: { visible: false }
-        }
-    });
-    Composite.add(world, mouseConstraint);
-    render.mouse = mouse;
-
-    // Double-click handler for navigation
-    // When a user double-clicks on a box with a URL, navigate to that URL
-    render.canvas.addEventListener('dblclick', (event) => {
+    function targetAt(event) {
         const rect = render.canvas.getBoundingClientRect();
-        const clickX = event.clientX - rect.left;
-        const clickY = event.clientY - rect.top;
+        const point = {
+            x: (event.clientX - rect.left) * render.canvas.width / rect.width,
+            y: (event.clientY - rect.top) * render.canvas.height / rect.height
+        };
+        return Query.point(interactiveBodies, point).find(body => body.targetUrl);
+    }
 
-        const clickedBodies = Query.point(allInteractiveBodies, { x: clickX, y: clickY });
+    function navigate(event) {
+        const target = targetAt(event);
+        if (target) window.location.href = target.targetUrl;
+    }
 
-        if (clickedBodies.length > 0) {
-            const targetBody = clickedBodies[0];
-            if (targetBody.targetUrl) {
-                window.location.href = targetBody.targetUrl;
-            }
+    // Desktop keeps double-click. A short touch opens a box on phones.
+    render.canvas.addEventListener('dblclick', navigate);
+    const touches = new Map();
+    render.canvas.addEventListener('pointerdown', event => {
+        if (event.pointerType === 'mouse') return;
+        touches.set(event.pointerId, {
+            x: event.clientX,
+            y: event.clientY,
+            time: performance.now(),
+            target: targetAt(event)
+        });
+    });
+    render.canvas.addEventListener('pointerup', event => {
+        const start = touches.get(event.pointerId);
+        touches.delete(event.pointerId);
+        if (!start) return;
+        const distance = Math.hypot(event.clientX - start.x, event.clientY - start.y);
+        if (start.target && distance < 12 && performance.now() - start.time < 450) {
+            window.location.href = start.target.targetUrl;
         }
     });
+    render.canvas.addEventListener('pointercancel', event => touches.delete(event.pointerId));
 
+    function resize() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        render.options.width = render.canvas.width = width;
+        render.options.height = render.canvas.height = height;
+        render.bounds.max.x = width;
+        render.bounds.max.y = height;
+        buildScene();
+    }
+
+    let resizeFrame;
     window.addEventListener('resize', () => {
-        render.canvas.width = window.innerWidth;
-        render.canvas.height = window.innerHeight;
+        cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(resize);
     });
+
+    buildScene();
 }

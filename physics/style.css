@@ -102,10 +102,14 @@
             .physics {
                 display: block;
                 height: auto;
+                width: calc(100% - 32px);
+                margin: 80px auto 32px;
             }
+            .back { left: 16px; }
             .window {
                 height: auto;
                 overflow: visible;
+                padding: 0 12px 32px;
             }
             .window:first-child {
                 border-right: none;
