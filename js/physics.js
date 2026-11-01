@@ -58,7 +58,7 @@ export function initPhysics() {
 
         const inset = 10;
         const walls = [
-            Bodies.rectangle(width / 2, groundY + wallThickness / 2, width * 2, wallThickness, { isStatic: true, restitution: 0.6, friction: 0.04, render: { visible: false } }),
+            Bodies.rectangle(width / 2, groundY + wallThickness / 2, width * 2, wallThickness, { isStatic: true, restitution: 1, render: { visible: false } }),
             Bodies.rectangle(width / 2, -wallThickness / 2, width * 2, wallThickness, { isStatic: true, render: { visible: false } }),
             Bodies.rectangle(inset - wallThickness / 2, height / 2, wallThickness, height * 2, { isStatic: true, render: { visible: false } }),
             Bodies.rectangle(width - inset + wallThickness / 2, height / 2, wallThickness, height * 2, { isStatic: true, render: { visible: false } })
@@ -69,10 +69,8 @@ export function initPhysics() {
         const boxes = CONFIG.links.map(link => {
             const y = Math.min(maxSpawnY, Math.max(link.y, minSpawnY));
             const body = Bodies.rectangle(width / 2 + link.xOffset * xScale, y, boxSize, boxSize, {
-                restitution: 0.6,
-                friction: 0.04,
-                frictionStatic: 0.08,
-                frictionAir: 0.01,
+                restitution: 0.8,
+                frictionAir: 0.02,
                 render: { fillStyle: '#111111', strokeStyle: '#00ffff', lineWidth: 2 }
             });
             body.customLabel = link.label;
